@@ -14,6 +14,6 @@ make build
 
 ## How to start the project:
 ``` bash
-make start
+make run
 python3 onlineparticipation/crawlers/test.py
 ```
