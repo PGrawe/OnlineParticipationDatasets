@@ -8,8 +8,8 @@ stop:
 	docker rm -f $(name) || true
 
 run: stop
-	docker run -it --rm=true -v $(shell pwd):/var/www \
+	docker run -it --rm=true -v $(shell pwd):/src \
 	--name=$(name) $(registry)/$(name) bash -l
 
 start: stop
-	docker run -d -v $(shell pwd):/var/www --name=$(name) $(registry)/$(name)
+	docker run -d -v $(shell pwd):/src --name=$(name) $(registry)/$(name)
