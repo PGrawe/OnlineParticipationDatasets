@@ -12,7 +12,7 @@ RUN sudo echo "Europe/Berlin " > /etc/timezone
 RUN sudo dpkg-reconfigure -f noninteractive tzdata
 
 
-WORKDIR /var/www
+WORKDIR /src
 ADD . .
 RUN pip install -r requirements.txt
 RUN pip install -e .
