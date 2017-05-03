@@ -11,6 +11,6 @@ class Bonn2011Spider(scrapy.Spider):
             # TODO: Follow each link
             yield {
                 # TODO: Parse id
-                'id' : thread.css('h2::text').extract_first()
+                'id' : thread.css('h2::text').extract()
                 #'title' :
             }
