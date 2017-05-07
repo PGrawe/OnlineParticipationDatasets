@@ -14,3 +14,11 @@ class Bonn2011Spider(scrapy.Spider):
                 'title' : thread.css('div.col_01 h3 a::text').extract_first(),
                 'link' : thread.css('div.col_01 h3 a::attr(href)').extract_first()
             }
+
+        # Here: Parse next Site
+        next_page = response.xpath('//div[@class="list_pages"]/a[contains(.,"vor")]/@href').extract_first()
+        if next_page:
+            yield scrapy.Request(
+                response.urljoin(next_page),
+                callback=self.parse
+            )
