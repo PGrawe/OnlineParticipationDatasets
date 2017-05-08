@@ -15,7 +15,7 @@ class Bonn2011Spider(scrapy.Spider):
             }
 
         # Here: Parse next Site
-        next_page = response.xpath('//div[@class="list_pages"]/a[contains(.,"vor")]/@href').extract_first()
+        next_page = response.xpath('//div[@class="list_pages"]/a[.,"vor"]/@href').extract_first()
         if next_page:
             yield scrapy.Request(
                 response.urljoin(next_page),
