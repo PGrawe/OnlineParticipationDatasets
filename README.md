@@ -15,5 +15,5 @@ make build
 ## How to start the project:
 ``` bash
 make run
-scrapy runspider onlineparticipation/crawlers/bonn2011.py -o downloads/bonn2011.json
+scrapy crawl bonn2011
 ```
