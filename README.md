@@ -15,6 +15,5 @@ make build
 ## How to start the project:
 ``` bash
 make run
-cd OnlineParticipationDataset
 scrapy crawl bonn2011
 ```
