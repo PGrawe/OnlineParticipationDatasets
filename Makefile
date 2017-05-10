@@ -16,4 +16,4 @@ start: stop
 
 bonn2011: stop
 	docker run -it --rm=true -v $(shell pwd):/src \
-	--name=$(name) $(registry)/$(name) OnlineParticipationDataset/scrapy crawl bonn2011
+	--name=$(name) $(registry)/$(name) scrapy crawl bonn2011
