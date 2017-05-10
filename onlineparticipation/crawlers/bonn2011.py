@@ -6,13 +6,7 @@ class Bonn2011Spider(scrapy.Spider):
 
     def parse(self, response):
         for thread in response.css('div.vorschlag.buergervorschlag'):
-            yield {
-                # TODO: Parse id
-                'id' : thread.css('h2::text').extract_first(),
-                'title' : thread.css('div.col_01 h3 a::text').extract_first(),
-                'link' : thread.css('div.col_01 h3 a::attr(href)').extract_first()
-                # yield request?
-            }
+            yield scrapy.Request(thread,callback=self.parse_thread)
 
         # Here: Parse next Site
         next_page = response.xpath('//div[@class="list_pages"]/a[.,"vor"]/@href').extract_first()
@@ -21,4 +15,10 @@ class Bonn2011Spider(scrapy.Spider):
                 response.urljoin(next_page),
                 callback=self.parse
             )
-        #Here: Parse threads with parse2?
+
+    def parse_thread(self, response):
+        # TODO: create Item, maybe with ItemLoader
+        yield {
+            'id' : response.xpath('//h2/text()').extract_first(),
+            'title' : response.xpath('//div[@class="col_01"]/h3/text()').extract_first(),
+            }
