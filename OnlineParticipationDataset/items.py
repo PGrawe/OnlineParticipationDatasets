@@ -14,8 +14,6 @@ class SuggestionItem(scrapy.Item):
     proposal = scrapy.Field()
     category = scrapy.Field()
     proposal_type = scrapy.Field()
-    est_volume_first = scrapy.Field()
-    est_volume_second = scrapy.Field()
     pro = scrapy.Field()
     contra = scrapy.Field()
     neutral = scrapy.Field()
