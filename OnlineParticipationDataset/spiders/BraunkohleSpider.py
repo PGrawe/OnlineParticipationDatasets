@@ -2,21 +2,23 @@ import scrapy
 from selenium import webdriver
 from OnlineParticipationDataset import items
 from datetime import datetime
+from itertools import count
 
 
 class BraunkohleSpider(scrapy.Spider):
     name = "braunkohle"
-    start_urls = ['https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/9',
-                  'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/11',
-                  'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/12',
-                  'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/13',
-                  'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/14',
-                  'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/17',
-                  'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/16']
-
+    # start_urls = ['https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/9',
+    #               'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/11',
+    #               'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/12',
+    #               'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/13',
+    #               'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/14',
+    #               'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/17',
+    #               'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/16']
+    start_urls = ['https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/11']
     def __init__(self, **kwargs):
         super(BraunkohleSpider, self).__init__(**kwargs)
-        self.driver = webdriver.Firefox()
+        self.id_counter=count(start=0, step=1)
+        #self.driver = webdriver.Firefox()
 
     def extract_num_comments(self, response):
         '''
@@ -51,16 +53,14 @@ class BraunkohleSpider(scrapy.Spider):
         :param response: scrapy response
         :return: suggestion item
         '''
-        sug_item = items.SuggestionItem
-        title = ' '.join(response.css('.ecm_draftBillParagraphContent.push-top>h1::text').extract())
-        suggestion = ' '.join(response.css(
+        sug_item = items.SuggestionItem()
+        #sug_item['id'] = response.css('.ecm_draftBillParagraphTabs>div>div>div::attr(id)').extract_first()
+        sug_item['id'] = self.id_counter.next()
+        sug_item['title'] = ' '.join(response.css('.ecm_draftBillParagraphContent.push-top>h1::text').extract())
+        sug_item['suggestion'] = ' '.join(response.css(
             '.ecm_draftBillParagraphContent.push-top>div>h3::text,.ecm_draftBillParagraphContent.push-top>div>p>strong::text').extract())
-        num_comments = int(self.extract_num_comments(response))
-        category = self.get_category(response)
-        sug_item.title = title
-        sug_item.suggestion = suggestion
-        sug_item.num_comments = num_comments
-        sug_item.category = category
+        sug_item['num_comments'] = int(self.extract_num_comments(response))
+        sug_item['category'] = self.get_category(response)
         return sug_item
 
     def get_datetime(self, comment):
@@ -82,13 +82,6 @@ class BraunkohleSpider(scrapy.Spider):
         com_details = comment.css('.ecm_commentDetails')
         return com_details.css('.ecm_userProfileLink span::text').extract_first()
 
-    def get_id(self, comment):
-        '''
-        Returns ID of comment
-        :param comment: comment (selector)
-        :return: ID (string) of comment
-        '''
-        return comment.css('::attr(id)').extract_first()
 
     def get_content(self, comment):
         '''
@@ -110,17 +103,17 @@ class BraunkohleSpider(scrapy.Spider):
         else:
             return False
 
-    def get_child_ids(self, comment_sublist):
-        '''
-        Returns a list of all comment-ids in a comment sublist
-        :param comment_sublist: comment-sublist (selector) 
-        :return: List of all comment ids (first level)
-        '''
-        ids = []
-        comments = comment_sublist.css('.ecm_commentSublist>.ecm_comment')
-        for comment in comments:
-            ids.append(self.get_id(comment))
-        return ids
+    # def get_child_ids(self, comment_sublist):
+    #     '''
+    #     Returns a list of all comment-ids in a comment sublist
+    #     :param comment_sublist: comment-sublist (selector)
+    #     :return: List of all comment ids (first level)
+    #     '''
+    #     ids = []
+    #     comments = comment_sublist.css('.ecm_commentSublist>.ecm_comment')
+    #     for comment in comments:
+    #         ids.append(self.get_id(comment))
+    #     return ids
 
     def get_children_comments(self, comment_sublist):
         '''
@@ -140,30 +133,37 @@ class BraunkohleSpider(scrapy.Spider):
 
     def create_comments(self, comments, comment_sublists, parent_id):
         '''
-        Creates comment items recursivly based on given list of comments (selectors) and list of comment-sublists (selectors)
+        Creates comment items recursively based on given list of comments (selectors) and list of comment-sublists (selectors)
         :param comments: list of comments (selectors)
         :param comment_sublists: list of comment-sublists (selectors)
-        :param id: ID of parent comment (if there is no parent: None)
+        :param id: ID of parent comment (For top level comments the id of the suggestion)
         :return: list of items to be yielded
         '''
         comment_list = []
         sub_iterator = iter(comment_sublists)
         for comment in comments:
             # Populate current item
-            tmp_comment = items.CommentItem
-            tmp_comment.author = self.get_author(comment)
-            tmp_comment.date_time = self.get_datetime(comment)
-            tmp_comment.id = self.get_id(comment)
-            tmp_comment.parent = parent_id
-            tmp_comment.content = self.get_content(comment)
+            tmp_comment = items.CommentItem()
+            tmp_comment['author'] = self.get_author(comment)
+            tmp_comment['date_time'] = self.get_datetime(comment)
+            tmp_comment['id'] = self.id_counter.next()
+            tmp_comment['parent'] = parent_id
+            tmp_comment['content'] = self.get_content(comment)
             # Check if comment has children
             if self.has_children(comment):
-                # Get next sublist
+                # Get next sublist (contains children comments)
                 comment_sublist = sub_iterator.next()
-                tmp_comment.post_children = self.get_child_ids(comment_sublist)
-                #TODO Get all comments and sublists for function call
-                #children = self.create_comments()
-                #TODO Recursivly call this function
+                # Add child-ids to current comment
+                #tmp_comment['children'] = self.get_child_ids(comment_sublist)
+                # Recursively call function with child comments and sublists
+                children_comments = self.get_children_comments(comment_sublist)
+                children_sublists = self.get_children_sublists(comment_sublist)
+                children = self.create_comments(children_comments, children_sublists, tmp_comment['id'])
+                # Add child comments to list
+                comment_list.extend(children)
+            # Add current comment to list
+            comment_list.append(tmp_comment)
+        return comment_list
 
     def parse(self, response):
         '''
@@ -172,19 +172,14 @@ class BraunkohleSpider(scrapy.Spider):
         :return: Yields items and new requests
         '''
         # Create, populate and yield suggestion item:
-        yield (self.create_suggestion_item(response))
+        suggestion = self.create_suggestion_item(response)
+        yield (suggestion)
         # Get comments (regular and with child comments):
-        comments = response.css('#comment-area>div>.ecm_comment')
+        initial_comments = response.css('#comment-area>div>.ecm_comment')
         # Get comment sublists (each corresponds to one comment with child comments in <comments>)
-        comment_sublists = response.css('#comment-area>div>.ecm_commentSublist')
-        sub_iterator = iter(comment_sublists)
-        #TODO Replace with call of create_comments
+        initial_comment_sublists = response.css('#comment-area>div>.ecm_commentSublist')
+        initial_id = suggestion['id']
+        comments = self.create_comments(initial_comments, initial_comment_sublists, initial_id)
         for comment in comments:
-            author = self.get_author(comment)
-            date_time = self.get_datetime(comment)
-            id = self.get_id(comment)
-            content = self.get_content(comment)
-            # Check if comment has children
-            if self.has_children(comment):
-                pass
-        #TODO Load further (javascript: selenium). Question: Load before parsing information or after? Missing child problem.
+            yield comment
+            # TODO Load further (javascript: selenium). Question: Load before parsing information or after? Missing child problem.
