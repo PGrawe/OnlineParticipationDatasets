@@ -15,10 +15,10 @@ class Bonn2011Spider(scrapy.Spider):
     def parse_datetime(self, str, format):
         return datetime.strptime(re.sub(r"(\s|[a-z])+", "", str.lower(), flags=re.UNICODE),format)
 
-    def parse_datetime_sug(self,str):
+    def parse_datetime_sug(self, str):
         return self.parse_datetime(str,'%d.%m.%Y-%H:%M')
 
-    def parse_datetime_com(self,str):
+    def parse_datetime_com(self, str):
         return self.parse_datetime(str,'|%d.%m.%Y|%H:%M')
 
 
@@ -36,6 +36,7 @@ class Bonn2011Spider(scrapy.Spider):
         sug_item['neutral'] = int(summary.xpath('.//td[starts-with(@id,"voteNeutral")]/text()').extract_first())
         sug_item['num_comments'] = int(float(response.xpath('count(//div[starts-with(@class,"kommentar")])').extract_first()))
         sug_item['date_time'] = self.parse_datetime_sug(response.xpath('.//div[@class="details"]/p/text()').extract_first())
+        return sug_item
 
     def parse(self, response):
         for thread in response.css('div.vorschlag.buergervorschlag'):
