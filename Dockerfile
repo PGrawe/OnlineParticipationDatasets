@@ -1,4 +1,5 @@
-FROM vimagick/scrapyd
+#FROM vimagick/scrapyd
+FROM python:3
 
 RUN echo "Europe/Berlin " > /etc/timezone
 RUN dpkg-reconfigure -f noninteractive tzdata
