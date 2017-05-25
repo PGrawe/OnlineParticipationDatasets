@@ -12,6 +12,8 @@ from datetime import datetime
 class SuggestionItem(scrapy.Item):
     # Item storing data of initial proposal.
     id = scrapy.Field(default = 'Unknown')
+    author = scrapy.Field(default='Unknown')
+    date_time = scrapy.Field(default=datetime.strptime("01/01/2999 13:37", "%d/%m/%Y %H:%M"))
     title = scrapy.Field(default='Unknown')
     suggestion = scrapy.Field(default='Unknown')
     category = scrapy.Field(default='Unknown')
