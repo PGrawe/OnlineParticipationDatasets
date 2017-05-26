@@ -17,13 +17,14 @@ class OnlineparticipationdatasetPipeline(object):
 class JsonWriterPipeline(object):
 
     def open_spider(self, spider):
-        self.file = open('downloads/items' + spider.name + '.jl', 'w')
+        self.file = open('downloads/items' + spider.name + '.json', 'w')
 
     def close_spider(self, spider):
         self.file.close()
 
     def process_item(self, item, spider):
-        item['date_time'] = item['date_time'].isoformat()
-        line = json.dumps(dict(item)) + "\n"
+        item_dict = dict(item)
+        item_dict['date_time'] = item_dict['date_time'].isoformat()
+        line = json.dumps(item_dict) + "\n"
         self.file.write(line)
         return item
