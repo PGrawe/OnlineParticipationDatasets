@@ -6,7 +6,23 @@
 # http://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from scrapy.http import HtmlResponse
+from selenium import webdriver
 
+class JSMiddleware(object):
+    def process_request(self, request, spider):
+        driver = webdriver.Firefox()
+        driver.get(request.url)
+        while True:
+            next = driver.find_element_by_css_selector('.btn btn-default btn-block ecm_showMoreLink')
+            try:
+                next.click()
+            except:
+                break
+        body = driver.page_source
+        current_url = driver.current_url
+        driver.close()
+        return HtmlResponse(current_url, body=body, encoding='utf-8', request=request)
 
 class OnlineparticipationdatasetSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,

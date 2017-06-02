@@ -18,7 +18,7 @@ class BraunkohleSpider(scrapy.Spider):
     def __init__(self, **kwargs):
         super(BraunkohleSpider, self).__init__(**kwargs)
         self.id_counter=count(start=0, step=1)
-        #self.driver = webdriver.Firefox()
+        # self.driver = webdriver.Firefox()
 
     def extract_num_comments(self, response):
         '''
@@ -172,6 +172,7 @@ class BraunkohleSpider(scrapy.Spider):
         :return: Yields items and new requests
         '''
         # Create, populate and yield suggestion item:
+
         suggestion = self.create_suggestion_item(response)
         yield (suggestion)
         # Get comments (regular and with child comments):

@@ -7,6 +7,7 @@
 
 import json
 from datetime import datetime
+from scrapy.exporters import JsonLinesItemExporter
 
 
 class OnlineparticipationdatasetPipeline(object):
@@ -14,17 +15,19 @@ class OnlineparticipationdatasetPipeline(object):
         return item
 
 
+
+
 class JsonWriterPipeline(object):
 
     def open_spider(self, spider):
-        self.file = open('downloads/items' + spider.name + '.json', 'w')
+        self.file = open("items_"+spider.name+".json", 'wb')
+        self.exporter = JsonLinesItemExporter(self.file, encoding='utf-8', ensure_ascii=False)
+        self.exporter.start_exporting()
 
     def close_spider(self, spider):
+        self.exporter.finish_exporting()
         self.file.close()
 
     def process_item(self, item, spider):
-        item_dict = dict(item)
-        item_dict['date_time'] = item_dict['date_time'].isoformat()
-        line = json.dumps(item_dict) + "\n"
-        self.file.write(line)
+        self.exporter.export_item(item)
         return item
