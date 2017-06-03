@@ -8,17 +8,43 @@
 from scrapy import signals
 from scrapy.http import HtmlResponse
 from selenium import webdriver
+import logging
+import time
 
 class JSMiddleware(object):
-    def process_request(self, request, spider):
-        driver = webdriver.Firefox()
-        driver.get(request.url)
+    '''
+    Middleware that deals with javascript loading on braunkohle-sites
+    '''
+    def click_button_repeat(self, driver, button_css, delay):
+        '''
+        Clicks a button as long as it can be found on the site. Results can be found in driver.
+        :param driver: Webdriver 
+        :param button_css: CSS-selector of the button
+        :param delay: Delay between each click
+        :return: None
+        '''
         while True:
-            next = driver.find_element_by_css_selector('.btn btn-default btn-block ecm_showMoreLink')
             try:
+                logging.info("Has tried to find button")
+                next = driver.find_element_by_css_selector(button_css)
+                logging.info("Has found button")
                 next.click()
+                logging.info("Has clicked")
+                time.sleep(delay)
+                logging.info("Has slept")
+
             except:
                 break
+
+    def process_request(self, request, spider):
+        logging.info("JS Middleware started")
+        #Create webdriver
+        driver = webdriver.Firefox()
+        driver.get(request.url)
+        #Click button to show more comments
+        self.click_button_repeat(driver, '.ecm_showMoreLink', 7)
+        #Click button to expand comments
+        self.click_button_repeat(driver,'.ecm_commentShowMore',7)
         body = driver.page_source
         current_url = driver.current_url
         driver.close()
