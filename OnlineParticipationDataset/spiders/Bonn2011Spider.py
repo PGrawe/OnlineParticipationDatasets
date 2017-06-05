@@ -110,9 +110,8 @@ class Bonn2011Spider(scrapy.Spider):
         Parse thread and yield a SuggestionItem, see :class:`~OnlineParticipationDataset.items.SuggestionItem`.
 
         :param response: scrapy response
-        :return: generator 
+        :return: generator
         """
         #TODO:
         # Parse all comments
-        suggestion = self.create_suggestion_item(response)
-        yield suggestion
+        yield self.create_suggestion_item(response)
