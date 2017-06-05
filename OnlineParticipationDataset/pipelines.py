@@ -20,7 +20,7 @@ class OnlineparticipationdatasetPipeline(object):
 class JsonWriterPipeline(object):
 
     def open_spider(self, spider):
-        self.file = open("items_"+spider.name+".json", 'wb')
+        self.file = open("downloads/items_"+spider.name+".json", 'wb')
         self.exporter = JsonLinesItemExporter(self.file, encoding='utf-8', ensure_ascii=False)
         self.exporter.start_exporting()
 
