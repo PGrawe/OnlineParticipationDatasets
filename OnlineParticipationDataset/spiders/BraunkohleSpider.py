@@ -7,17 +7,18 @@ from itertools import count
 
 class BraunkohleSpider(scrapy.Spider):
     name = "braunkohle"
-    # start_urls = ['https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/9',
-    #               'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/11',
-    #               'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/12',
-    #               'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/13',
-    #               'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/14',
-    #               'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/17',
-    #               'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/16']
-    start_urls = ['https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/11']
+    js = True
+    urls = [      'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/11',
+                  'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/12',
+                  'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/13',
+                  'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/14',
+                  'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/17',
+                  'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/16']
+    start_urls = ['https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/9']
     def __init__(self, **kwargs):
         super(BraunkohleSpider, self).__init__(**kwargs)
         self.id_counter=count(start=0, step=1)
+        self.link_counter=iter(self.urls)
         # self.driver = webdriver.Firefox()
 
     def extract_num_comments(self, response):
@@ -55,7 +56,7 @@ class BraunkohleSpider(scrapy.Spider):
         '''
         sug_item = items.SuggestionItem()
         #sug_item['id'] = response.css('.ecm_draftBillParagraphTabs>div>div>div::attr(id)').extract_first()
-        sug_item['id'] = self.id_counter.next()
+        sug_item['id'] = next(self.id_counter)
         sug_item['title'] = ' '.join(response.css('.ecm_draftBillParagraphContent.push-top>h1::text').extract())
         sug_item['suggestion'] = ' '.join(response.css(
             '.ecm_draftBillParagraphContent.push-top>div>h3::text,.ecm_draftBillParagraphContent.push-top>div>p>strong::text').extract())
@@ -146,13 +147,13 @@ class BraunkohleSpider(scrapy.Spider):
             tmp_comment = items.CommentItem()
             tmp_comment['author'] = self.get_author(comment)
             tmp_comment['date_time'] = self.get_datetime(comment)
-            tmp_comment['id'] = self.id_counter.next()
+            tmp_comment['id'] = next(self.id_counter)
             tmp_comment['parent'] = parent_id
             tmp_comment['content'] = self.get_content(comment)
             # Check if comment has children
             if self.has_children(comment):
                 # Get next sublist (contains children comments)
-                comment_sublist = sub_iterator.next()
+                comment_sublist = next(sub_iterator)
                 # Add child-ids to current comment
                 #tmp_comment['children'] = self.get_child_ids(comment_sublist)
                 # Recursively call function with child comments and sublists
@@ -183,4 +184,9 @@ class BraunkohleSpider(scrapy.Spider):
         comments = self.create_comments(initial_comments, initial_comment_sublists, initial_id)
         for comment in comments:
             yield comment
-            # TODO Load further (javascript: selenium). Question: Load before parsing information or after? Missing child problem.
+        try:
+            next_url = next(self.link_counter)
+            yield scrapy.Request(url=next_url,callback=self.parse)
+        except Exception:
+            self.log("No more links.")
+

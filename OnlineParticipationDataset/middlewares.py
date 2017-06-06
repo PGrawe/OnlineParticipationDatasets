@@ -37,18 +37,22 @@ class JSMiddleware(object):
                 break
 
     def process_request(self, request, spider):
-        logging.info("JS Middleware started")
-        #Create webdriver
-        driver = webdriver.Firefox()
-        driver.get(request.url)
-        #Click button to show more comments
-        self.click_button_repeat(driver, '.ecm_showMoreLink', 7)
-        #Click button to expand comments
-        self.click_button_repeat(driver,'.ecm_commentShowMore',7)
-        body = driver.page_source
-        current_url = driver.current_url
-        driver.close()
-        return HtmlResponse(current_url, body=body, encoding='utf-8', request=request)
+        if spider.js:
+            logging.info("JS Middleware started")
+            #Create webdriver
+            # driver = webdriver.PhantomJS()
+            driver = webdriver.PhantomJS(executable_path='/usr/local/bin/phantomjs-2.1.1-linux-x86_64/bin/phantomjs')
+            driver.get(request.url)
+            #Click button to show more comments
+            self.click_button_repeat(driver, '.ecm_showMoreLink', 7)
+            #Click button to expand comments
+            self.click_button_repeat(driver,'.ecm_commentShowMore',7)
+            body = driver.page_source
+            current_url = driver.current_url
+            driver.close()
+            return HtmlResponse(current_url, body=body, encoding='utf-8', request=request)
+        else:
+            return request
 
 class OnlineparticipationdatasetSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
