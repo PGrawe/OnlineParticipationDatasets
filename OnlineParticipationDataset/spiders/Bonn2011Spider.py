@@ -44,12 +44,53 @@ class Bonn2011Spider(scrapy.Spider):
         """
         return self.parse_datetime(s,'|%d.%m.%Y|%H:%M')
 
+    def parse_comment_id(self, s):
+        if s is not None:
+            return int(re.search(r"ID\:\D*(\d+)",s)[1])
 
-    def create_comment_items(self, response):
-        comment_stack = list()
-        comments = response.xpath('//div[starts-with(@class,"kommentar")]').extract()
-        #TODO: get ID and push to stack
+    def parse_comment_id_official(self,s):
+
         return
+
+    def create_comment_item(self, response):
+        comment_item = items.CommentItem()
+        comment_class = response.xpath('@class').extract_first().replace('kommentar_','').split()
+
+        comment_item['level'] = int(comment_class[0])
+        comment_item['id'] = self.parse_comment_id(response.xpath('.//div[@class="col_01"]/comment()').extract_first())
+
+        # XXX
+        if(len(comment_class) == 2):
+            if "ablehnung" == comment_class[1]:
+                comment_item['vote'] = "refusal"
+            elif "zustimmung" == comment_class[1]:
+                comment_item['vote'] = "approval"
+            elif "neutral" == comment_class[1]:
+                comment_item['vote'] = "neutral"
+            else:
+                # If official the id is located elsewhere
+                # comment_item['id'] =
+                comment_item['vote'] = "official"
+        else:
+            comment_item['vote'] = "answer"
+
+
+        return comment_item
+
+    def parse_comment_tree(self, item_list, suggestion_id):
+        pos_stack = []
+
+        return item_list
+
+    def create_comment_item_list(self, response):
+        # Dont change resonse -> work with list to create a tree
+        comment_items = []
+        for comment in response.xpath('//div[starts-with(@class,"kommentar")]'):
+            comment_items.append(self.create_comment_item(comment))
+        suggestion_id,_=self.parse_id_and_author(
+            response.xpath('.//div[@class="vorschlag buergervorschlag"]/h2/text()')
+            .extract_first())
+        return self.parse_comment_tree(comment_items,suggestion_id)
 
     def create_suggestion_item(self, response):
         """
@@ -58,34 +99,34 @@ class Bonn2011Spider(scrapy.Spider):
         :param response: scrapy response
         :return: scrapy item
         """
-        sug_item = items.SuggestionItem()
+        suggestion_item = items.SuggestionItem()
         # parse id
-        sug_item['id'],sug_item['author'] = self.parse_id_and_author(
+        suggestion_item['id'],suggestion_item['author'] = self.parse_id_and_author(
             response.xpath('.//div[@class="vorschlag buergervorschlag"]/h2/text()')
             .extract_first())
-        sug_item['title'] = response.xpath('.//div[@class="col_01"]/h3/text()').extract_first()
-        sug_item['category'] = response.xpath(
+        suggestion_item['title'] = response.xpath('.//div[@class="col_01"]/h3/text()').extract_first()
+        suggestion_item['category'] = response.xpath(
             './/div[@class="vorschlag buergervorschlag"]/div[@class="image"]/img/@title').extract_first()
-        sug_item['suggestion_type'] = response.xpath('.//div[@class="col_01"]/strong/text()').extract_first()
-        sug_item['suggestion'] = response.xpath('.//div[@class="col_01"]/p/text()').extract_first()
+        suggestion_item['suggestion_type'] = response.xpath('.//div[@class="col_01"]/strong/text()').extract_first()
+        suggestion_item['suggestion'] = response.xpath('.//div[@class="col_01"]/p/text()').extract_first()
         summary = response.xpath('.//div[@class="col_01"]/table')
-        sug_item['pro'] = int(
+        suggestion_item['pro'] = int(
             summary.xpath('.//td[starts-with(@id,"votePro")]/text()')
             .extract_first())
-        sug_item['contra'] = int(
+        suggestion_item['contra'] = int(
             summary.xpath('.//td[starts-with(@id,"voteContra")]/text()')
             .extract_first())
-        sug_item['neutral'] = int(
+        suggestion_item['neutral'] = int(
             summary.xpath('.//td[starts-with(@id,"voteNeutral")]/text()')
             .extract_first())
-        sug_item['num_comments'] = int(
+        suggestion_item['num_comments'] = int(
             # float(response.xpath('count(//div[starts-with(@class,"kommentar")])')
             #       .extract_first()))
                 summary.xpath('.//td[starts-with(.,"Kommentare")]/../td[@class="r"]/text()')
                 .extract_first())
-        sug_item['date_time'] = self.parse_datetime_sug(
+        suggestion_item['date_time'] = self.parse_datetime_sug(
             response.xpath('.//div[@class="details"]/p/text()').extract_first())
-        return sug_item
+        return suggestion_item
 
     def parse(self, response):
         """
@@ -101,9 +142,9 @@ class Bonn2011Spider(scrapy.Spider):
 
 
         # Here: Parse next Site
-        next_page = response.xpath('.//div[@class="list_pages"]/a[.="vor"]/@href').extract_first()
-        if next_page:
-            yield response.follow(next_page,self.parse)
+        # next_page = response.xpath('.//div[@class="list_pages"]/a[.="vor"]/@href').extract_first()
+        # if next_page:
+        #     yield response.follow(next_page,self.parse)
 
     def parse_thread(self, response):
         """
@@ -112,6 +153,8 @@ class Bonn2011Spider(scrapy.Spider):
         :param response: scrapy response
         :return: generator
         """
-        #TODO:
-        # Parse all comments
+
         yield self.create_suggestion_item(response)
+
+        # TODO: Parse tree of comments
+        yield from self.create_comment_item_list(response)
