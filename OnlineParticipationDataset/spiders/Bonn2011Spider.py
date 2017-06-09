@@ -6,7 +6,6 @@ import re
 
 class Bonn2011Spider(scrapy.Spider):
     name = "bonn2011"
-    js = False
     start_urls = ['http://bonn-packts-an-2011.de/www.bonn-packts-an.de/dito/forumc0d2.html']
 
     def suggestion_id(self,response):

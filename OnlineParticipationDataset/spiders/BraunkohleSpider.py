@@ -7,7 +7,7 @@ from itertools import count
 
 class BraunkohleSpider(scrapy.Spider):
     name = "braunkohle"
-    js = True
+    custom_settings = {"DOWNLOADER_MIDDLEWARES": {'OnlineParticipationDataset.middlewares.JSMiddleware': 543,}}
     urls = [      'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/11',
                   'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/12',
                   'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/13',
@@ -119,7 +119,7 @@ class BraunkohleSpider(scrapy.Spider):
     def get_children_comments(self, comment_sublist):
         '''
         Returns a list of all comments in a comment sublist
-        :param comment_sublist: comment-sublist (selector) 
+        :param comment_sublist: comment-sublist (selector)
         :return: List of all comments (first level)
         '''
         return comment_sublist.css('.ecm_commentSublist>.ecm_comment')
@@ -127,7 +127,7 @@ class BraunkohleSpider(scrapy.Spider):
     def get_children_sublists(self, comment_sublist):
         '''
         Returns a list of all sublists in a comment sublist
-        :param comment_sublist: comment-sublist (selector) 
+        :param comment_sublist: comment-sublist (selector)
         :return: List of all sublists (first level)
         '''
         return comment_sublist.css('.ecm_commentSublist>.ecm_commentSublist')
@@ -189,4 +189,3 @@ class BraunkohleSpider(scrapy.Spider):
             yield scrapy.Request(url=next_url,callback=self.parse)
         except Exception:
             self.log("No more links.")
-
