@@ -31,5 +31,6 @@ class JsonWriterPipeline(object):
         self.file.close()
 
     def process_item(self, item, spider):
+        item['date_time'] = item['date_time'].isoformat()
         self.exporter.export_item(item)
         return item
