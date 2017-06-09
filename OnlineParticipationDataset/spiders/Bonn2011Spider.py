@@ -8,14 +8,51 @@ class Bonn2011Spider(scrapy.Spider):
     name = "bonn2011"
     start_urls = ['http://bonn-packts-an-2011.de/www.bonn-packts-an.de/dito/forumc0d2.html']
 
-    def parse_id_and_author(self, s):
-        r"""
-        Extract suggestion id and author from given String.
+    def suggestion_id(self,response):
+        return (re.search('([B,V]\d+)',response.xpath('.//div[@class="vorschlag buergervorschlag"]/h2/text()')
+            .extract_first()))[0]
 
-        :param s: string with possible ID like [A_Z]\d+ and author after 'von '
-        :return: tuple of strings
-        """
-        return (re.search('([B,V]\d+)',s)[0],re.search('(?:von\s)(\w+)',s)[1])
+    def suggestion_author(self,response):
+        return (re.search('(?:von\s)(\w+)',response.xpath('.//div[@class="vorschlag buergervorschlag"]/h2/text()')
+            .extract_first()))[1]
+
+    def suggestion_title(self,response):
+        return response.xpath('.//div[@class="col_01"]/h3/text()').extract_first()
+
+    def suggestion_category(self,response):
+        return response.xpath(
+            './/div[@class="vorschlag buergervorschlag"]/div[@class="image"]/img/@title').extract_first()
+
+    def suggestion_type(self,response):
+        return response.xpath('.//div[@class="col_01"]/strong/text()').extract_first()
+
+    def suggestion_text(sef,response):
+        return response.xpath('.//div[@class="col_01"]/p/text()').extract_first()
+
+    def suggestion_summary_response(self,response):
+        return response.xpath('.//div[@class="col_01"]/table')
+
+    def suggestion_approval(self,response):
+         return int(
+             self.suggestion_summary_response(response).xpath('.//td[starts-with(@id,"votePro")]/text()')
+            .extract_first())
+
+    def suggestion_refusal(self,response):
+        return int(
+            self.suggestion_summary_response(response).xpath('.//td[starts-with(@id,"voteContra")]/text()')
+            .extract_first())
+
+    def suggestion_abstention(self,response):
+        return int(
+            self.suggestion_summary_response(response).xpath('.//td[starts-with(@id,"voteNeutral")]/text()')
+            .extract_first())
+
+    def suggestion_comment_count(self, response):
+        return int(
+            # float(response.xpath('count(//div[starts-with(@class,"kommentar")])')
+            #       .extract_first()))
+                self.suggestion_summary_response(response).xpath('.//td[starts-with(.,"Kommentare")]/../td[@class="r"]/text()')
+                .extract_first())
 
     def parse_datetime(self, s, format):
         """
@@ -34,6 +71,11 @@ class Bonn2011Spider(scrapy.Spider):
         :return: datetime obj
         """
         return self.parse_datetime(s,'%d.%m.%Y-%H:%M')
+
+    def suggestion_datetime(self,response):
+        return self.parse_datetime(
+                response.xpath('.//div[@class="details"]/p/text()').extract_first()
+                ,'%d.%m.%Y-%H:%M')
 
     def parse_datetime_com(self, s):
         """
@@ -100,32 +142,17 @@ class Bonn2011Spider(scrapy.Spider):
         :return: scrapy item
         """
         suggestion_item = items.SuggestionItem()
-        # parse id
-        suggestion_item['id'],suggestion_item['author'] = self.parse_id_and_author(
-            response.xpath('.//div[@class="vorschlag buergervorschlag"]/h2/text()')
-            .extract_first())
-        suggestion_item['title'] = response.xpath('.//div[@class="col_01"]/h3/text()').extract_first()
-        suggestion_item['category'] = response.xpath(
-            './/div[@class="vorschlag buergervorschlag"]/div[@class="image"]/img/@title').extract_first()
-        suggestion_item['suggestion_type'] = response.xpath('.//div[@class="col_01"]/strong/text()').extract_first()
-        suggestion_item['suggestion'] = response.xpath('.//div[@class="col_01"]/p/text()').extract_first()
-        summary = response.xpath('.//div[@class="col_01"]/table')
-        suggestion_item['pro'] = int(
-            summary.xpath('.//td[starts-with(@id,"votePro")]/text()')
-            .extract_first())
-        suggestion_item['contra'] = int(
-            summary.xpath('.//td[starts-with(@id,"voteContra")]/text()')
-            .extract_first())
-        suggestion_item['neutral'] = int(
-            summary.xpath('.//td[starts-with(@id,"voteNeutral")]/text()')
-            .extract_first())
-        suggestion_item['num_comments'] = int(
-            # float(response.xpath('count(//div[starts-with(@class,"kommentar")])')
-            #       .extract_first()))
-                summary.xpath('.//td[starts-with(.,"Kommentare")]/../td[@class="r"]/text()')
-                .extract_first())
-        suggestion_item['date_time'] = self.parse_datetime_sug(
-            response.xpath('.//div[@class="details"]/p/text()').extract_first())
+        suggestion_item['id'] = self.suggestion_id(response)
+        suggestion_item['author'] = self.suggestion_author(response)
+        suggestion_item['title'] = self.suggestion_title(response)
+        suggestion_item['category'] = self.suggestion_category(response)
+        suggestion_item['suggestion_type'] = self.suggestion_type(response)
+        suggestion_item['suggestion'] = self.suggestion_text(response)
+        suggestion_item['pro'] = self.suggestion_approval(response)
+        suggestion_item['contra'] = self.suggestion_refusal(response)
+        suggestion_item['neutral'] = self.suggestion_abstention(response)
+        suggestion_item['num_comments'] = self.suggestion_comment_count(response)
+        suggestion_item['date_time'] = self.suggestion_datetime(response)
         return suggestion_item
 
     def parse(self, response):
@@ -157,4 +184,4 @@ class Bonn2011Spider(scrapy.Spider):
         yield self.create_suggestion_item(response)
 
         # TODO: Parse tree of comments
-        yield from self.create_comment_item_list(response)
+        # yield from self.create_comment_item_list(response)
