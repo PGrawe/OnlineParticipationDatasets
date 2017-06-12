@@ -83,6 +83,14 @@ class BraunkohleSpider(scrapy.Spider):
         com_details = comment.css('.ecm_commentDetails')
         return com_details.css('.ecm_userProfileLink span::text').extract_first()
 
+    def get_voting(self, comment):
+        '''
+        Returns voting (likes) of comment
+        :param comment: comment (selector)
+        :return: number of likes (string)
+        '''
+        com_rating = comment.css('.ecm_commentRating .ecm_rate')
+        return com_rating.css('span::text').extract_first()
 
     def get_content(self, comment):
         '''
@@ -104,17 +112,6 @@ class BraunkohleSpider(scrapy.Spider):
         else:
             return False
 
-    # def get_child_ids(self, comment_sublist):
-    #     '''
-    #     Returns a list of all comment-ids in a comment sublist
-    #     :param comment_sublist: comment-sublist (selector)
-    #     :return: List of all comment ids (first level)
-    #     '''
-    #     ids = []
-    #     comments = comment_sublist.css('.ecm_commentSublist>.ecm_comment')
-    #     for comment in comments:
-    #         ids.append(self.get_id(comment))
-    #     return ids
 
     def get_children_comments(self, comment_sublist):
         '''
@@ -150,6 +147,7 @@ class BraunkohleSpider(scrapy.Spider):
             tmp_comment['id'] = next(self.id_counter)
             tmp_comment['parent'] = parent_id
             tmp_comment['content'] = self.get_content(comment)
+            tmp_comment['voting'] = self.get_voting(comment)
             # Check if comment has children
             if self.has_children(comment):
                 # Get next sublist (contains children comments)
