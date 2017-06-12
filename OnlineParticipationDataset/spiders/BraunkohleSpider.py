@@ -56,11 +56,11 @@ class BraunkohleSpider(scrapy.Spider):
         '''
         sug_item = items.SuggestionItem()
         #sug_item['id'] = response.css('.ecm_draftBillParagraphTabs>div>div>div::attr(id)').extract_first()
-        sug_item['id'] = next(self.id_counter)
+        sug_item['suggestion_id'] = next(self.id_counter)
         sug_item['title'] = ' '.join(response.css('.ecm_draftBillParagraphContent.push-top>h1::text').extract())
-        sug_item['suggestion'] = ' '.join(response.css(
+        sug_item['content'] = ' '.join(response.css(
             '.ecm_draftBillParagraphContent.push-top>div>h3::text,.ecm_draftBillParagraphContent.push-top>div>p>strong::text').extract())
-        sug_item['num_comments'] = int(self.extract_num_comments(response))
+        sug_item['comment_count'] = int(self.extract_num_comments(response))
         sug_item['category'] = self.get_category(response)
         return sug_item
 
@@ -147,7 +147,7 @@ class BraunkohleSpider(scrapy.Spider):
             tmp_comment = items.CommentItem()
             tmp_comment['author'] = self.get_author(comment)
             tmp_comment['date_time'] = self.get_datetime(comment)
-            tmp_comment['id'] = next(self.id_counter)
+            tmp_comment['comment_id'] = next(self.id_counter)
             tmp_comment['parent'] = parent_id
             tmp_comment['content'] = self.get_content(comment)
             # Check if comment has children
@@ -159,7 +159,7 @@ class BraunkohleSpider(scrapy.Spider):
                 # Recursively call function with child comments and sublists
                 children_comments = self.get_children_comments(comment_sublist)
                 children_sublists = self.get_children_sublists(comment_sublist)
-                children = self.create_comments(children_comments, children_sublists, tmp_comment['id'])
+                children = self.create_comments(children_comments, children_sublists, tmp_comment['comment_id'])
                 # Add child comments to list
                 comment_list.extend(children)
             # Add current comment to list
@@ -180,7 +180,7 @@ class BraunkohleSpider(scrapy.Spider):
         initial_comments = response.css('#comment-area>div>.ecm_comment')
         # Get comment sublists (each corresponds to one comment with child comments in <comments>)
         initial_comment_sublists = response.css('#comment-area>div>.ecm_commentSublist')
-        initial_id = suggestion['id']
+        initial_id = suggestion['suggestion_id']
         comments = self.create_comments(initial_comments, initial_comment_sublists, initial_id)
         for comment in comments:
             yield comment

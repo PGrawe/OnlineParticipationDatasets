@@ -120,7 +120,7 @@ class Bonn2011Spider(scrapy.Spider):
         comment_class = response.xpath('@class').extract_first().replace('kommentar_','').split()
 
         comment_item['level'] = int(comment_class[0])
-        comment_item['id'] = self.comment_id(response)
+        comment_item['comment_id'] = self.comment_id(response)
         comment_item['suggestion_id'] = self.suggestion_id(response.xpath('..'))
         comment_item['content'] = self.comment_content(response)
         comment_item['author'] = self.comment_author(response)
@@ -138,7 +138,7 @@ class Bonn2011Spider(scrapy.Spider):
                 comment_item['vote'] = "neutral"
             elif "stellungnahme" == comment_class[1] or "verwaltung" == comment_class[1]:
 
-                comment_item['id'] = self.comment_id_official(response)
+                comment_item['comment_id'] = self.comment_id_official(response)
                 comment_item['vote'] = "official"
             else:
                 comment_item['vote'] = "misc"
@@ -167,16 +167,16 @@ class Bonn2011Spider(scrapy.Spider):
         :return: scrapy item
         """
         suggestion_item = items.SuggestionItem()
-        suggestion_item['id'] = self.suggestion_id(response)
+        suggestion_item['suggestion_id'] = self.suggestion_id(response)
         suggestion_item['author'] = self.suggestion_author(response)
         suggestion_item['title'] = self.suggestion_title(response)
         suggestion_item['category'] = self.suggestion_category(response)
         suggestion_item['suggestion_type'] = self.suggestion_type(response)
-        suggestion_item['suggestion'] = self.suggestion_content(response)
-        suggestion_item['pro'] = self.suggestion_approval(response)
-        suggestion_item['contra'] = self.suggestion_refusal(response)
-        suggestion_item['neutral'] = self.suggestion_abstention(response)
-        suggestion_item['num_comments'] = self.suggestion_comment_count(response)
+        suggestion_item['content'] = self.suggestion_content(response)
+        suggestion_item['approval'] = self.suggestion_approval(response)
+        suggestion_item['refusal'] = self.suggestion_refusal(response)
+        suggestion_item['abstention'] = self.suggestion_abstention(response)
+        suggestion_item['comment_count'] = self.suggestion_comment_count(response)
         suggestion_item['date_time'] = self.suggestion_datetime(response)
         return suggestion_item
 
@@ -194,9 +194,9 @@ class Bonn2011Spider(scrapy.Spider):
 
 
         # Here: Parse next Site
-        next_page = response.xpath('.//div[@class="list_pages"]/a[.="vor"]/@href').extract_first()
-        if next_page:
-            yield response.follow(next_page,self.parse)
+        # next_page = response.xpath('.//div[@class="list_pages"]/a[.="vor"]/@href').extract_first()
+        # if next_page:
+        #     yield response.follow(next_page,self.parse)
 
     def parse_thread(self, response):
         """
