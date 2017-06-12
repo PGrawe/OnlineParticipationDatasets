@@ -26,7 +26,7 @@ class Bonn2011Spider(scrapy.Spider):
     def suggestion_type(self,response):
         return response.xpath('.//div[@class="col_01"]/strong/text()').extract_first()
 
-    def suggestion_text(sef,response):
+    def suggestion_content(sef,response):
         return response.xpath('.//div[@class="col_01"]/p/text()').extract_first()
 
     def suggestion_summary_response(self,response):
@@ -54,7 +54,7 @@ class Bonn2011Spider(scrapy.Spider):
                 self.suggestion_summary_response(response).xpath('.//td[starts-with(.,"Kommentare")]/../td[@class="r"]/text()')
                 .extract_first())
 
-    def parse_datetime(self, s, format):
+    def parse_datetime(self, s):
         """
         Create datetime for given string with given format. Removes spaces.
 
@@ -63,45 +63,72 @@ class Bonn2011Spider(scrapy.Spider):
         :return: datetime obj
         """
         return datetime.strptime(
-            re.sub(r"(\s|[a-z])+", "", s.lower(), flags=re.UNICODE),format)
+            re.sub(r"(\s|[a-z])+", "", s.lower(), flags=re.UNICODE),'%d.%m.%Y-%H:%M')
 
-    def parse_datetime_sug(self, s):
-        """ Create datetime obj for given string from a suggestion.
-        :param s: String with date and time from the suggestion.
-        :return: datetime obj
-        """
-        return self.parse_datetime(s,'%d.%m.%Y-%H:%M')
+    # def parse_datetime_sug(self, s):
+    #     """ Create datetime obj for given string from a suggestion.
+    #     :param s: String with date and time from the suggestion.
+    #     :return: datetime obj
+    #     """
+    #     return self.parse_datetime(s,'%d.%m.%Y-%H:%M',r"(\s|[a-z])+")
 
     def suggestion_datetime(self,response):
         return self.parse_datetime(
-                response.xpath('.//div[@class="details"]/p/text()').extract_first()
-                ,'%d.%m.%Y-%H:%M')
+                response.xpath('.//div[@class="details"]/p/text()').extract_first())
 
-    def parse_datetime_com(self, s):
+    def parse_datetime_commment(self, s):
         """
         Create datetime obj for given string from a comment.
 
         :param s: String with date and time from the comment.
         :return: datetime obj
         """
-        return self.parse_datetime(s,'|%d.%m.%Y|%H:%M')
+        s = s.split("|")
+        s = "-".join(s[1:])
+        return self.parse_datetime(s)
 
     def parse_comment_id(self, s):
         if s is not None:
-            return int(re.search(r"ID\:\D*(\d+)",s)[1])
+            return re.search(r"ID\:\D*(\d+)",s)[1]
+
+    def comment_id(self,response):
+        return self.parse_comment_id(response.xpath('.//div[@class="col_01"]/comment()').extract_first())
 
     def parse_comment_id_official(self,s):
+        return re.search(r"Nr\.\s*(\d+)",s)[1]
 
-        return
+    def comment_id_official(self,response):
+        return self.parse_comment_id_official(response.xpath('.//div[@class="user"]/text()').extract_first())
+
+    def comment_content(self,response):
+        return response.xpath('.//div[@class="col_01"]/p/text()').extract_first().strip()
+
+    def comment_title(self,response):
+        return response.xpath('.//div[@class="col_01"]/h2/text()').extract_first().strip()
+
+    def parse_comment_author(self,s):
+        return re.search(r"von\s+(\w+)\s+",s)[1]
+
+    def comment_author(self,response):
+        return self.parse_comment_author(response.xpath('.//div[@class="user"]/text()').extract_first())
+
+    def comment_datetime(self,response):
+        return self.parse_datetime_commment(response.xpath('.//div[@class="user"]/text()').extract_first())
 
     def create_comment_item(self, response):
         comment_item = items.CommentItem()
         comment_class = response.xpath('@class').extract_first().replace('kommentar_','').split()
 
         comment_item['level'] = int(comment_class[0])
-        comment_item['id'] = self.parse_comment_id(response.xpath('.//div[@class="col_01"]/comment()').extract_first())
+        comment_item['comment_id'] = self.comment_id(response)
+        comment_item['suggestion_id'] = self.suggestion_id(response.xpath('..'))
+        comment_item['content'] = self.comment_content(response)
+        comment_item['author'] = self.comment_author(response)
+        comment_item['date_time'] = self.comment_datetime(response)
+        comment_item['title'] = self.comment_title(response)
 
-        # XXX
+        # If official the id is located elsewhere
+        # if len < 2 its an answer on a comment with vote
         if(len(comment_class) == 2):
             if "ablehnung" == comment_class[1]:
                 comment_item['vote'] = "refusal"
@@ -109,17 +136,18 @@ class Bonn2011Spider(scrapy.Spider):
                 comment_item['vote'] = "approval"
             elif "neutral" == comment_class[1]:
                 comment_item['vote'] = "neutral"
-            else:
-                # If official the id is located elsewhere
-                # comment_item['id'] =
+            elif "stellungnahme" == comment_class[1] or "verwaltung" == comment_class[1]:
+
+                comment_item['comment_id'] = self.comment_id_official(response)
                 comment_item['vote'] = "official"
+            else:
+                comment_item['vote'] = "misc"
         else:
             comment_item['vote'] = "answer"
 
-
         return comment_item
 
-    def parse_comment_tree(self, item_list, suggestion_id):
+    def parse_comment_tree(self, item_list):
         pos_stack = []
 
         return item_list
@@ -129,10 +157,7 @@ class Bonn2011Spider(scrapy.Spider):
         comment_items = []
         for comment in response.xpath('//div[starts-with(@class,"kommentar")]'):
             comment_items.append(self.create_comment_item(comment))
-        suggestion_id,_=self.parse_id_and_author(
-            response.xpath('.//div[@class="vorschlag buergervorschlag"]/h2/text()')
-            .extract_first())
-        return self.parse_comment_tree(comment_items,suggestion_id)
+        return self.parse_comment_tree(comment_items)
 
     def create_suggestion_item(self, response):
         """
@@ -142,16 +167,16 @@ class Bonn2011Spider(scrapy.Spider):
         :return: scrapy item
         """
         suggestion_item = items.SuggestionItem()
-        suggestion_item['id'] = self.suggestion_id(response)
+        suggestion_item['suggestion_id'] = self.suggestion_id(response)
         suggestion_item['author'] = self.suggestion_author(response)
         suggestion_item['title'] = self.suggestion_title(response)
         suggestion_item['category'] = self.suggestion_category(response)
         suggestion_item['suggestion_type'] = self.suggestion_type(response)
-        suggestion_item['suggestion'] = self.suggestion_text(response)
-        suggestion_item['pro'] = self.suggestion_approval(response)
-        suggestion_item['contra'] = self.suggestion_refusal(response)
-        suggestion_item['neutral'] = self.suggestion_abstention(response)
-        suggestion_item['num_comments'] = self.suggestion_comment_count(response)
+        suggestion_item['content'] = self.suggestion_content(response)
+        suggestion_item['approval'] = self.suggestion_approval(response)
+        suggestion_item['refusal'] = self.suggestion_refusal(response)
+        suggestion_item['abstention'] = self.suggestion_abstention(response)
+        suggestion_item['comment_count'] = self.suggestion_comment_count(response)
         suggestion_item['date_time'] = self.suggestion_datetime(response)
         return suggestion_item
 
@@ -184,4 +209,4 @@ class Bonn2011Spider(scrapy.Spider):
         yield self.create_suggestion_item(response)
 
         # TODO: Parse tree of comments
-        # yield from self.create_comment_item_list(response)
+        yield from self.create_comment_item_list(response)
