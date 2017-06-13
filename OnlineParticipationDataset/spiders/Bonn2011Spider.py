@@ -10,11 +10,11 @@ class Bonn2011Spider(scrapy.Spider):
     # start_urls = ['http://bonn-packts-an-2011.de/www.bonn-packts-an.de/dito/forum9b64.html']
 
     def suggestion_id(self,response):
-        return (re.search('([A-Z]\d+)',response.xpath('.//div[contains(@class,"vorschlag")]/h2/text()')
+        return (re.search('([A-Z]\d+)',response.xpath('.//div[starts-with(@class,"vorschlag")]/h2/text()')
             .extract_first()))[0]
 
     def suggestion_author(self,response):
-        return (re.search('(?:von\s)(\w+)',response.xpath('.//div[contains(@class,"vorschlag")]/h2/text()')
+        return (re.search('(?:von\s)(\w+)',response.xpath('.//div[starts-with(@class,"vorschlag")]/h2/text()')
             .extract_first()))[1]
 
     def suggestion_title(self,response):
@@ -22,7 +22,7 @@ class Bonn2011Spider(scrapy.Spider):
 
     def suggestion_category(self,response):
         return response.xpath(
-            './/div[contains(@class,"vorschlag")]/div[@class="image"]/img/@title').extract_first()
+            './/div[starts-with(@class,"vorschlag")]/div[@class="image"]/img/@title').extract_first()
 
     def suggestion_type(self,response):
         return response.xpath('.//div[@class="col_01"]/strong/text()').extract_first()
@@ -201,7 +201,7 @@ class Bonn2011Spider(scrapy.Spider):
         :param response: scrapy response
         :return: generator
         """
-        for thread in response.xpath('//div[contains(@class,"vorschlag")]'):
+        for thread in response.xpath('//div[starts-with(@class,"vorschlag")]'):
             thread_url = thread.xpath('.//div[@class="col_01"]/h3/a/@href').extract_first()
             yield response.follow(thread_url,self.parse_thread)
 
