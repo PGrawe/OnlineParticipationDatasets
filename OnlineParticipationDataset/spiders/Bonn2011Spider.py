@@ -219,6 +219,4 @@ class Bonn2011Spider(scrapy.Spider):
         """
 
         yield self.create_suggestion_item(response)
-
-        # TODO: Parse tree of comments
         yield from self.create_comment_item_list(response)
