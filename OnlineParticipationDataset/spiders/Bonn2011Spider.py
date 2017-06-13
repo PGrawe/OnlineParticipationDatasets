@@ -116,6 +116,12 @@ class Bonn2011Spider(scrapy.Spider):
         return self.parse_datetime_commment(response.xpath('.//div[@class="user"]/text()').extract_first())
 
     def create_comment_item(self, response):
+        """
+        Create a CommentItem, see :class:`~OnlineParticipationDataset.items.CommentItem`, from given response.
+
+        :param response: scrapy response
+        :return: scrapy item
+        """
         comment_item = items.CommentItem()
         comment_class = response.xpath('@class').extract_first().replace('kommentar_','').split()
 
@@ -149,6 +155,12 @@ class Bonn2011Spider(scrapy.Spider):
         return comment_item
 
     def parse_comment_tree(self, item_list):
+        """
+        Parse list with CommentItems, see :class:`~OnlineParticipationDataset.items.CommentItem`, to restore the comment tree. Write parent and children to items.
+
+        :param list with CommmentItems
+        :return list with CommmentItems
+        """
         stack = []
         for position,item in enumerate(item_list):
             while(len(stack) >= item['level']):
@@ -168,7 +180,12 @@ class Bonn2011Spider(scrapy.Spider):
         return item_list
 
     def create_comment_item_list(self, response):
-        # Dont change resonse -> work with list to create a tree
+        """
+        Create a list of CommentItems, see :class:`~OnlineParticipationDataset.items.CommentItem`, from given response.
+
+        :param response: scrapy response
+        :return: list with CommentItems
+        """
         comment_items = []
         for comment in response.xpath('//div[starts-with(@class,"kommentar")]'):
             comment_items.append(self.create_comment_item(comment))
