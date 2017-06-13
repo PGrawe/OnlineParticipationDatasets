@@ -55,34 +55,14 @@ class Bonn2011Spider(scrapy.Spider):
                 .extract_first())
 
     def parse_datetime(self, s):
-        """
-        Create datetime for given string with given format. Removes spaces.
-
-        :param s: String with date and time.
-        :param format: Format for :func:`~datetime.strptime`
-        :return: datetime obj
-        """
         return datetime.strptime(
             re.sub(r"(\s|[a-z])+", "", s.lower(), flags=re.UNICODE),'%d.%m.%Y-%H:%M')
-
-    # def parse_datetime_sug(self, s):
-    #     """ Create datetime obj for given string from a suggestion.
-    #     :param s: String with date and time from the suggestion.
-    #     :return: datetime obj
-    #     """
-    #     return self.parse_datetime(s,'%d.%m.%Y-%H:%M',r"(\s|[a-z])+")
 
     def suggestion_datetime(self,response):
         return self.parse_datetime(
                 response.xpath('.//div[@class="details"]/p/text()').extract_first())
 
     def parse_datetime_commment(self, s):
-        """
-        Create datetime obj for given string from a comment.
-
-        :param s: String with date and time from the comment.
-        :return: datetime obj
-        """
         s = s.split("|")
         s = "-".join(s[1:])
         return self.parse_datetime(s)
