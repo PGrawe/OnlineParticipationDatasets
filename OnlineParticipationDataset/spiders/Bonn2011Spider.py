@@ -126,6 +126,7 @@ class Bonn2011Spider(scrapy.Spider):
         comment_item['author'] = self.comment_author(response)
         comment_item['date_time'] = self.comment_datetime(response)
         comment_item['title'] = self.comment_title(response)
+        comment_item['children'] = []
 
         # If official the id is located elsewhere
         # if len < 2 its an answer on a comment with vote
@@ -148,8 +149,22 @@ class Bonn2011Spider(scrapy.Spider):
         return comment_item
 
     def parse_comment_tree(self, item_list):
-        pos_stack = []
-
+        stack = []
+        for position,item in enumerate(item_list):
+            while(len(stack) >= item['level']):
+                stack.pop()
+            # Check if not first level, i.e. stack not is empty
+            if stack:
+                # (pos,id)
+                parent_tuple = stack[-1]
+                # Parent is the last seen item
+                item['parent'] = parent_tuple[1]
+                # Add current item as child to parent
+                item_list[parent_tuple[0]]['children'].append(item['comment_id'])
+            else:
+                # Top-Level Comments
+                item['parent'] = item['suggestion_id']
+            stack.append(tuple((position,item['comment_id'])))
         return item_list
 
     def create_comment_item_list(self, response):
@@ -194,9 +209,9 @@ class Bonn2011Spider(scrapy.Spider):
 
 
         # Here: Parse next Site
-        # next_page = response.xpath('.//div[@class="list_pages"]/a[.="vor"]/@href').extract_first()
-        # if next_page:
-        #     yield response.follow(next_page,self.parse)
+        next_page = response.xpath('.//div[@class="list_pages"]/a[.="vor"]/@href').extract_first()
+        if next_page:
+            yield response.follow(next_page,self.parse)
 
     def parse_thread(self, response):
         """
