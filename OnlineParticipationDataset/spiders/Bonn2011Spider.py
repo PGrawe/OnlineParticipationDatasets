@@ -112,7 +112,6 @@ class Bonn2011Spider(scrapy.Spider):
         comment_item['author'] = self.comment_author(response)
         comment_item['date_time'] = self.comment_datetime(response)
         comment_item['title'] = self.comment_title(response)
-        comment_item['children'] = []
 
         # If official the id is located elsewhere
         # if len < 2 its an answer on a comment with vote
@@ -136,13 +135,14 @@ class Bonn2011Spider(scrapy.Spider):
 
     def parse_comment_tree(self, item_list):
         """
-        Parse list with CommentItems, see :class:`~OnlineParticipationDataset.items.CommentItem`, to restore the comment tree. Write parent and children to items.
+        Parse list with CommentItems, see :class:`~OnlineParticipationDataset.items.CommentItem`, to restore the comment tree. Write parent and children to items. Items need to have values for level, commment_id and suggestion_id.
 
         :param list with CommmentItems
         :return list with CommmentItems
         """
         stack = []
         for position,item in enumerate(item_list):
+            item['children'] = []
             while(len(stack) >= item['level']):
                 stack.pop()
             # Check if not first level, i.e. stack not is empty
