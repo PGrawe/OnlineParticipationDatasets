@@ -8,6 +8,7 @@
 from scrapy import signals
 from scrapy.http import HtmlResponse
 from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import logging
 import time
 
@@ -37,10 +38,13 @@ class JSMiddleware(object):
                 break
 
     def process_request(self, request, spider):
-        logging.info("JS Middleware started")
+        logging.info('JS Middleware started!')
         #Create webdriver
-        # driver = webdriver.PhantomJS()
-        driver = webdriver.PhantomJS(executable_path='/usr/local/bin/phantomjs-2.1.1-linux-x86_64/bin/phantomjs')
+        dcap = dict(DesiredCapabilities.PHANTOMJS)
+        dcap["phantomjs.page.settings.userAgent"] = (
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/53 "
+            "(KHTML, like Gecko) Chrome/15.0.87")
+        driver = webdriver.PhantomJS(executable_path='/usr/local/bin/phantomjs-2.1.1-linux-x86_64/bin/phantomjs',desired_capabilities=dcap)
         driver.get(request.url)
         #Click button to show more comments
         self.click_button_repeat(driver, '.ecm_showMoreLink', 7)

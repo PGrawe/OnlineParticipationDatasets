@@ -11,7 +11,8 @@ from datetime import datetime
 
 class SuggestionItem(scrapy.Item):
     # Item storing data of initial proposal.
-    suggestion_id = scrapy.Field(default = 'Unknown')
+    id = scrapy.Field(default = 'Unknown')
+    suggestion_id = scrapy.Field(default='Unknown')
     author = scrapy.Field(default='Unknown')
     date_time = scrapy.Field(default=datetime.strptime("01/01/2999 13:37", "%d/%m/%Y %H:%M"))
     title = scrapy.Field(default='Unknown')
@@ -22,10 +23,13 @@ class SuggestionItem(scrapy.Item):
     refusal = scrapy.Field(default=0)
     abstention = scrapy.Field(default=0)
     comment_count = scrapy.Field(default=0)
+    parent = scrapy.Field(default = 'None')
+    children = scrapy.Field(default=[])
 
 
 class CommentItem(scrapy.Item):
     # Item storing data of user-comments
+    id = scrapy.Field(default='Unknown')
     comment_id = scrapy.Field(default='Unknown')
     suggestion_id = scrapy.Field(default='Unknown')
     author = scrapy.Field(default='Unknown')
