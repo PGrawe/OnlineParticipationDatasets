@@ -64,22 +64,19 @@ class TreeGenerationPipeline(object):
         :param spider: Spider scraping items
         :return: None
         '''
-        if spider.tree:
-            self.data = {}
+        self.data = {}
 
     def process_item(self,item, spider):
         '''
         Adds all items to dict self.data and links items to their parents as children when possible (First pass of tree-generation).
         :param item: Item to be added to dict
-        :param spider: Spider scraping items 
+        :param spider: Spider scraping items
         :return: Item
         '''
-        if spider.tree:
-            self.data[item['id']]=item
-            if item['parent'] in self.data.keys():
-                if item['parent'] != 'None' and item not in self.data[item['parent']]['children']:
-                    self.data[item['parent']]['children'].append(item)
-        return item
+        self.data[item['id']]=item
+        if item['parent'] in self.data.keys():
+            if item['parent'] != 'None' and item not in self.data[item['parent']]['children']:
+                self.data[item['parent']]['children'].append(item)
 
     def close_spider(self, spider):
         '''
@@ -87,22 +84,21 @@ class TreeGenerationPipeline(object):
         :param spider: Spider scraping items
         :return: None
         '''
-        if spider.tree:
-            for id, item in self.data.items():
-                if item['parent'] in self.data.keys():
-                    if item['parent'] != 'None' and item not in self.data[item['parent']]['children']:
-                        self.data[item['parent']]['children'].append(item)
-            suggestions = [item for id, item in self.data.items() if item['parent'] == 'None']
-            self.sort_data(suggestions)
-            if not os.path.isdir(path):
-                os.makedirs(path)
-            file = open("downloads/items_tree_" + spider.name + ".json", 'wb')
-            exporter = JsonLinesItemExporter(file, encoding='utf-8', ensure_ascii=False)
-            exporter.start_exporting()
-            for item in suggestions:
-                exporter.export_item(item)
-            exporter.finish_exporting()
-            file.close()
+        for id, item in self.data.items():
+            if item['parent'] in self.data.keys():
+                if item['parent'] != 'None' and item not in self.data[item['parent']]['children']:
+                    self.data[item['parent']]['children'].append(item)
+        suggestions = [item for id, item in self.data.items() if item['parent'] == 'None']
+        self.sort_data(suggestions)
+        if not os.path.isdir(path):
+            os.makedirs(path)
+        file = open("downloads/items_tree_" + spider.name + ".json", 'wb')
+        exporter = JsonLinesItemExporter(file, encoding='utf-8', ensure_ascii=False)
+        exporter.start_exporting()
+        for item in suggestions:
+            exporter.export_item(item)
+        exporter.finish_exporting()
+        file.close()
 
     def sort_data(self, suggestions):
         '''
