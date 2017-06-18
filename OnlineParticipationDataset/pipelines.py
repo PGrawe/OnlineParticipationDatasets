@@ -18,8 +18,15 @@ class OnlineparticipationdatasetPipeline(object):
 
 
 class JsonWriterPipeline(object):
-
+    '''
+    Pipeline for storing scraped items in plain json
+    '''
     def open_spider(self, spider):
+        '''
+        Creates json-file in downloads folder on spider starting. Output file is named: items_<spider_name>.json
+        :param spider: Spider scraping items
+        :return: None
+        '''
         if not os.path.isdir(path):
             os.makedirs(path)
         self.file = open("downloads/items_"+spider.name+".json", 'wb')
@@ -27,34 +34,66 @@ class JsonWriterPipeline(object):
         self.exporter.start_exporting()
 
     def close_spider(self, spider):
+        '''
+        Closes json file on spider closing
+        :param spider: Spider scraping
+        :return: None
+        '''
         self.exporter.finish_exporting()
         self.file.close()
 
     def process_item(self, item, spider):
+        '''
+        Exports item to json-file. Converts dates into iso-format.
+        :param item: Item to be saved
+        :param spider: Spider scraping items
+        :return: Item
+        '''
         if hasattr(item,'date_time'):
             item['date_time'] = item['date_time'].isoformat()
         self.exporter.export_item(item)
         return item
 
 class TreeGenerationPipeline(object):
+    '''
+    Pipeline generating nested json output file according to discussion-tree structure coded in items
+    '''
     def open_spider(self, spider):
+        '''
+        Initializes tree-reference
+        :param spider: Spider scraping items
+        :return: None
+        '''
         if spider.tree:
             self.data = {}
 
     def process_item(self,item, spider):
+        '''
+        Adds all items to dict self.data and links items to their parents as children when possible (First pass of tree-generation).
+        :param item: Item to be added to dict
+        :param spider: Spider scraping items 
+        :return: Item
+        '''
         if spider.tree:
             self.data[item['id']]=item
             if item['parent'] in self.data.keys():
                 if item['parent'] != 'None' and item not in self.data[item['parent']]['children']:
                     self.data[item['parent']]['children'].append(item)
+        return item
 
     def close_spider(self, spider):
+        '''
+        Updates dict self.data in order to link all children items to their parent (Second pass of tree-generation). Exports result to json in downloads-folder(filename: items_tree_<spider_name>.json)
+        :param spider: Spider scraping items
+        :return: None
+        '''
         if spider.tree:
             for id, item in self.data.items():
                 if item['parent'] in self.data.keys():
                     if item['parent'] != 'None' and item not in self.data[item['parent']]['children']:
                         self.data[item['parent']]['children'].append(item)
             suggestions = [item for id, item in self.data.items() if item['parent'] == 'None']
+            self.sort_data(suggestions)
             if not os.path.isdir(path):
                 os.makedirs(path)
             file = open("downloads/items_tree_" + spider.name + ".json", 'wb')
@@ -64,3 +103,25 @@ class TreeGenerationPipeline(object):
                 exporter.export_item(item)
             exporter.finish_exporting()
             file.close()
+
+    def sort_data(self, suggestions):
+        '''
+        Sorts self.data (items) by date. (In place)
+        :param suggestions: List of top level suggestion items.
+        :return: Ordered list of top level suggestion items (by date).
+        '''
+        for suggestion in suggestions:
+            if suggestion['children']:
+                self.sort_children(suggestion['children'])
+        return suggestions
+
+    def sort_children(self, children):
+        '''
+        Sorts children items by date (In place)
+        :param children: list of children items
+        :return: None
+        '''
+        children.sort(key=lambda k: k['date_time'])
+        for child in children:
+            if child['children']:
+                self.sort_children(child['children'])
