@@ -6,7 +6,6 @@ import re
 
 class Bonn2011Spider(scrapy.Spider):
     name = "bonn2011"
-    tree = False
     start_urls = ['http://bonn-packts-an-2011.de/www.bonn-packts-an.de/dito/forumc0d2.html']
 
     def suggestion_id(self,response):
@@ -113,7 +112,6 @@ class Bonn2011Spider(scrapy.Spider):
         comment_item['author'] = self.comment_author(response)
         comment_item['date_time'] = self.comment_datetime(response)
         comment_item['title'] = self.comment_title(response)
-        comment_item['children']=[]
 
         # If official the id is located elsewhere
         # if len < 2 its an answer on a comment with vote

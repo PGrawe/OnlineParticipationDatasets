@@ -8,7 +8,13 @@ from itertools import count
 class BraunkohleSpider(scrapy.Spider):
     name = "braunkohle"
     tree = True
-    custom_settings = {"DOWNLOADER_MIDDLEWARES": {'OnlineParticipationDataset.middlewares.JSMiddleware': 543,}}
+    custom_settings = {"DOWNLOADER_MIDDLEWARES": {'OnlineParticipationDataset.middlewares.JSMiddleware': 543,},
+                       "ITEM_PIPELINES ": {
+                          # 'OnlineParticipationDataset.pipelines.OnlineparticipationdatasetPipeline': 300,
+                          'OnlineParticipationDataset.pipelines.JsonWriterPipeline': 300,
+                          'OnlineParticipationDataset.pipelines.TreeGenerationPipeline': 400
+
+                       }}
     urls = [      'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/11',
                   'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/12',
                   'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/13',

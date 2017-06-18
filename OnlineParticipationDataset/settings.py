@@ -67,7 +67,7 @@ DOWNLOAD_DELAY = 0
 ITEM_PIPELINES = {
    # 'OnlineParticipationDataset.pipelines.OnlineparticipationdatasetPipeline': 300,
    'OnlineParticipationDataset.pipelines.JsonWriterPipeline': 300,
-   'OnlineParticipationDataset.pipelines.TreeGenerationPipeline': 400
+   # 'OnlineParticipationDataset.pipelines.TreeGenerationPipeline': 400
 
 }
 
