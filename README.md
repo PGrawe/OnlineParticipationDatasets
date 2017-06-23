@@ -1,7 +1,7 @@
 # OnlineParticipationDatasets
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/Liebeck/OnlineParticipationDatasets/blob/master/LICENSE)
 
-This projects aims to share text content from online participation processes by sharing crawlers instead of the text contents themselves which might not be possible due to legal reasons.
+This projects aims to share text content from online participation processes by sharing crawlers instead of the text contents themselves which might not be possible due to legal reasons. The text contets of the individual online participation plattforms will be downloaded via [scrapy](https://scrapy.org/) into a JSON file.
 
 ## Dependencies
 * [docker](https://www.docker.com/)
