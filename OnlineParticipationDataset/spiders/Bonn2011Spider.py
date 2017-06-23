@@ -150,12 +150,12 @@ class Bonn2011Spider(scrapy.Spider):
                 # (pos,id)
                 parent_tuple = stack[-1]
                 # Parent is the last seen item
-                item['parent'] = parent_tuple[1]
+                item['parent_id'] = parent_tuple[1]
                 # Add current item as child to parent
-                item_list[parent_tuple[0]]['children'].append(item['comment_id'])
+                item_list[parent_tuple[0]]['children'].append(item)
             else:
                 # Top-Level Comments
-                item['parent'] = item['suggestion_id']
+                item['parent_id'] = item['suggestion_id']
             stack.append(tuple((position,item['comment_id'])))
         return item_list
 
@@ -206,9 +206,9 @@ class Bonn2011Spider(scrapy.Spider):
 
 
         # Here: Parse next Site
-        next_page = response.xpath('.//div[@class="list_pages"]/a[.="vor"]/@href').extract_first()
-        if next_page:
-            yield response.follow(next_page,self.parse)
+        # next_page = response.xpath('.//div[@class="list_pages"]/a[.="vor"]/@href').extract_first()
+        # if next_page:
+        #     yield response.follow(next_page,self.parse)
 
     def parse_thread(self, response):
         """
@@ -217,6 +217,6 @@ class Bonn2011Spider(scrapy.Spider):
         :param response: scrapy response
         :return: generator
         """
-
-        yield self.create_suggestion_item(response)
-        yield from self.create_comment_item_list(response)
+        suggestion = self.create_suggestion_item(response)
+        suggestion['comments'] = self.create_comment_item_list(response)
+        yield suggestion
