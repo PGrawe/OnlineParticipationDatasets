@@ -58,7 +58,6 @@ class JsonWriterPipeline(object):
             item['date_time'] = item['date_time'].isoformat()
         item['comments'] = [self.comment_dict(comment) for comment in item['comments']]
         self.item_list.append(dict(item))
-        # json.dump(dict(item), self.outfile, indent=2)
         return item
 
 class TreeGenerationPipeline(object):
