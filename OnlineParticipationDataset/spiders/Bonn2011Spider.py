@@ -206,9 +206,9 @@ class Bonn2011Spider(scrapy.Spider):
 
 
         # Here: Parse next Site
-        # next_page = response.xpath('.//div[@class="list_pages"]/a[.="vor"]/@href').extract_first()
-        # if next_page:
-        #     yield response.follow(next_page,self.parse)
+        next_page = response.xpath('.//div[@class="list_pages"]/a[.="vor"]/@href').extract_first()
+        if next_page:
+            yield response.follow(next_page,self.parse)
 
     def parse_thread(self, response):
         """
