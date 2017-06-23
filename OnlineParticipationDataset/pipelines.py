@@ -29,6 +29,7 @@ class JsonWriterPipeline(object):
         if not os.path.isdir(path):
             os.makedirs(path)
         self.outfile = open("downloads/items_"+spider.name+".json", 'w')
+        self.item_list = []
 
     def close_spider(self, spider):
         '''
@@ -36,6 +37,7 @@ class JsonWriterPipeline(object):
         :param spider: Spider scraping
         :return: None
         '''
+        json.dump(self.item_list, self.outfile, indent=2)
         self.outfile.close()
 
     def comment_dict(self, item):
@@ -55,7 +57,8 @@ class JsonWriterPipeline(object):
         if 'date_time' in item:
             item['date_time'] = item['date_time'].isoformat()
         item['comments'] = [self.comment_dict(comment) for comment in item['comments']]
-        json.dump(dict(item), self.outfile, indent=2)
+        self.item_list.append(dict(item))
+        # json.dump(dict(item), self.outfile, indent=2)
         return item
 
 class TreeGenerationPipeline(object):
