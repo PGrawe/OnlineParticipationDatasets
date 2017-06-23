@@ -7,7 +7,6 @@
 
 import json,os
 from datetime import datetime
-from scrapy.exporters import JsonLinesItemExporter
 
 path = "downloads"
 
@@ -29,9 +28,7 @@ class JsonWriterPipeline(object):
         '''
         if not os.path.isdir(path):
             os.makedirs(path)
-        self.file = open("downloads/items_"+spider.name+".json", 'wb')
-        self.exporter = JsonLinesItemExporter(self.file, encoding='utf-8', ensure_ascii=False)
-        self.exporter.start_exporting()
+        self.outfile = open("downloads/items_"+spider.name+".json", 'w')
 
     def close_spider(self, spider):
         '''
@@ -39,8 +36,14 @@ class JsonWriterPipeline(object):
         :param spider: Spider scraping
         :return: None
         '''
-        self.exporter.finish_exporting()
-        self.file.close()
+        self.outfile.close()
+
+    def comment_dict(self, item):
+        if type(item['date_time']) is datetime:
+            item['date_time'] = item['date_time'].isoformat()
+        if item['children']:
+            item['children'] = [self.comment_dict(comment) for comment in item['children']]
+        return dict(item)
 
     def process_item(self, item, spider):
         '''
@@ -49,9 +52,10 @@ class JsonWriterPipeline(object):
         :param spider: Spider scraping items
         :return: Item
         '''
-        if hasattr(item,'date_time'):
+        if 'date_time' in item:
             item['date_time'] = item['date_time'].isoformat()
-        self.exporter.export_item(item)
+        item['comments'] = [self.comment_dict(comment) for comment in item['comments']]
+        json.dump(dict(item), self.outfile, indent=2)
         return item
 
 class TreeGenerationPipeline(object):
