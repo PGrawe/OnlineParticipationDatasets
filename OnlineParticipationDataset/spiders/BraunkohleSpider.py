@@ -9,9 +9,9 @@ class BraunkohleSpider(scrapy.Spider):
     name = "braunkohle"
     tree = True
     custom_settings = {"DOWNLOADER_MIDDLEWARES": {'OnlineParticipationDataset.middlewares.JSMiddleware': 543,},
-                       "ITEM_PIPELINES ": {
+                       "ITEM_PIPELINES": {
                           # 'OnlineParticipationDataset.pipelines.OnlineparticipationdatasetPipeline': 300,
-                          'OnlineParticipationDataset.pipelines.JsonWriterPipeline': 300,
+                          # 'OnlineParticipationDataset.pipelines.JsonWriterPipeline': 300,
                           'OnlineParticipationDataset.pipelines.TreeGenerationPipeline': 400
 
                        }}

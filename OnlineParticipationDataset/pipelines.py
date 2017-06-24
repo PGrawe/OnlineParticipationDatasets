@@ -8,6 +8,9 @@
 import json,os
 from datetime import datetime
 
+import logging
+from scrapy.exporters import JsonItemExporter
+
 path = "downloads"
 
 
@@ -99,12 +102,13 @@ class TreeGenerationPipeline(object):
         if not os.path.isdir(path):
             os.makedirs(path)
         file = open("downloads/items_tree_" + spider.name + ".json", 'wb')
-        exporter = JsonLinesItemExporter(file, encoding='utf-8', ensure_ascii=False)
+        exporter = JsonItemExporter(file, encoding='utf-8', ensure_ascii=False)
         exporter.start_exporting()
         for item in suggestions:
             exporter.export_item(item)
         exporter.finish_exporting()
         file.close()
+        logging.info(suggestions)
 
     def sort_data(self, suggestions):
         '''

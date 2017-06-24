@@ -1,0 +1,87 @@
+[1mdiff --git a/OnlineParticipationDataset/items.py b/OnlineParticipationDataset/items.py[m
+[1mindex d7fdf7e..0a81833 100644[m
+[1m--- a/OnlineParticipationDataset/items.py[m
+[1m+++ b/OnlineParticipationDataset/items.py[m
+[36m@@ -11,6 +11,7 @@[m [mfrom datetime import datetime[m
+ [m
+ class SuggestionItem(scrapy.Item):[m
+     # Item storing data of initial proposal.[m
+[32m+[m[32m    id=scrapy.Field(default='Unknown')[m
+     suggestion_id = scrapy.Field(default='Unknown')[m
+     author = scrapy.Field(default='Unknown')[m
+     date_time = scrapy.Field(default=datetime.strptime("01/01/2999 13:37", "%d/%m/%Y %H:%M"))[m
+[36m@@ -21,12 +22,16 @@[m [mclass SuggestionItem(scrapy.Item):[m
+     approval = scrapy.Field(default=0)[m
+     refusal = scrapy.Field(default=0)[m
+     abstention = scrapy.Field(default=0)[m
+[32m+[m[32m    children = scrapy.Field(default=[])[m
+[32m+[m[32m    parent = scrapy.Field(default='None')[m
+     comment_count = scrapy.Field(default=0)[m
+     comments = scrapy.Field(default=[])[m
+ [m
+ [m
+ class CommentItem(scrapy.Item):[m
+     # Item storing data of user-comments[m
+[32m+[m[32m    parent = scrapy.Field(default ='Unknown')[m
+[32m+[m[32m    id = scrapy.Field(default='Unknown')[m
+     comment_id = scrapy.Field(default='Unknown')[m
+     suggestion_id = scrapy.Field(default='Unknown')[m
+     author = scrapy.Field(default='Unknown')[m
+[1mdiff --git a/OnlineParticipationDataset/pipelines.py b/OnlineParticipationDataset/pipelines.py[m
+[1mindex 2cf2d8d..9ba2a8c 100644[m
+[1m--- a/OnlineParticipationDataset/pipelines.py[m
+[1m+++ b/OnlineParticipationDataset/pipelines.py[m
+[36m@@ -8,6 +8,9 @@[m
+ import json,os[m
+ from datetime import datetime[m
+ [m
+[32m+[m[32mimport logging[m
+[32m+[m[32mfrom scrapy.exporters import JsonItemExporter[m
+[32m+[m
+ path = "downloads"[m
+ [m
+ [m
+[36m@@ -99,12 +102,13 @@[m [mclass TreeGenerationPipeline(object):[m
+         if not os.path.isdir(path):[m
+             os.makedirs(path)[m
+         file = open("downloads/items_tree_" + spider.name + ".json", 'wb')[m
+[31m-        exporter = JsonLinesItemExporter(file, encoding='utf-8', ensure_ascii=False)[m
+[32m+[m[32m        exporter = JsonItemExporter(file, encoding='utf-8', ensure_ascii=False)[m
+         exporter.start_exporting()[m
+         for item in suggestions:[m
+             exporter.export_item(item)[m
+         exporter.finish_exporting()[m
+         file.close()[m
+[32m+[m[32m        logging.info(suggestions)[m
+ [m
+     def sort_data(self, suggestions):[m
+         '''[m
+[1mdiff --git a/OnlineParticipationDataset/settings.py b/OnlineParticipationDataset/settings.py[m
+[1mindex 2bc5c95..86e302b 100644[m
+[1m--- a/OnlineParticipationDataset/settings.py[m
+[1m+++ b/OnlineParticipationDataset/settings.py[m
+[36m@@ -66,9 +66,8 @@[m [mDOWNLOAD_DELAY = 0[m
+ # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html[m
+ ITEM_PIPELINES = {[m
+    # 'OnlineParticipationDataset.pipelines.OnlineparticipationdatasetPipeline': 300,[m
+[31m-   'OnlineParticipationDataset.pipelines.JsonWriterPipeline': 300,[m
+[31m-   # 'OnlineParticipationDataset.pipelines.TreeGenerationPipeline': 400[m
+[31m-[m
+[32m+[m[32m   #'OnlineParticipationDataset.pipelines.JsonWriterPipeline': 300,[m
+[32m+[m[32m   'OnlineParticipationDataset.pipelines.TreeGenerationPipeline': 400[m
+ }[m
+ [m
+ # Enable and configure the AutoThrottle extension (disabled by default)[m
+[1mdiff --git a/OnlineParticipationDataset/spiders/BraunkohleSpider.py b/OnlineParticipationDataset/spiders/BraunkohleSpider.py[m
+[1mindex b939c3c..c7d1eac 100644[m
+[1m--- a/OnlineParticipationDataset/spiders/BraunkohleSpider.py[m
+[1m+++ b/OnlineParticipationDataset/spiders/BraunkohleSpider.py[m
+[36m@@ -11,7 +11,7 @@[m [mclass BraunkohleSpider(scrapy.Spider):[m
+     custom_settings = {"DOWNLOADER_MIDDLEWARES": {'OnlineParticipationDataset.middlewares.JSMiddleware': 543,},[m
+                        "ITEM_PIPELINES ": {[m
+                           # 'OnlineParticipationDataset.pipelines.OnlineparticipationdatasetPipeline': 300,[m
+[31m-                          'OnlineParticipationDataset.pipelines.JsonWriterPipeline': 300,[m
+[32m+[m[32m                          # 'OnlineParticipationDataset.pipelines.JsonWriterPipeline': 300,[m
+                           'OnlineParticipationDataset.pipelines.TreeGenerationPipeline': 400[m
+ [m
+                        }}[m

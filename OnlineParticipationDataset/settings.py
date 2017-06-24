@@ -68,7 +68,6 @@ ITEM_PIPELINES = {
    # 'OnlineParticipationDataset.pipelines.OnlineparticipationdatasetPipeline': 300,
    'OnlineParticipationDataset.pipelines.JsonWriterPipeline': 300,
    # 'OnlineParticipationDataset.pipelines.TreeGenerationPipeline': 400
-
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
