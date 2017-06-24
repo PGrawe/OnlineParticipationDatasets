@@ -5,7 +5,7 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
-import json,os
+import os
 from datetime import datetime
 
 import logging
@@ -34,7 +34,6 @@ class JsonWriterPipeline(object):
         self.outfile = open("downloads/items_"+spider.name+".json", 'wb')
         self.exporter = JsonItemExporter(self.outfile, encoding='utf-8', ensure_ascii=False, indent=2)
         self.exporter.start_exporting()
-        self.item_list = []
 
     def close_spider(self, spider):
         '''
