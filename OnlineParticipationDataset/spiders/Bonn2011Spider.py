@@ -157,7 +157,7 @@ class Bonn2011Spider(scrapy.Spider):
                 # Top-Level Comments
                 item['parent_id'] = item['suggestion_id']
             stack.append(tuple((position,item['comment_id'])))
-        return item_list
+        return list(filter(lambda x: x['level'] <= 1, item_list))
 
     def create_comment_item_list(self, response):
         """
