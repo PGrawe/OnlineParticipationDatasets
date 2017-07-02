@@ -65,6 +65,7 @@ class TreeGenerationPipeline(object):
         :return: None
         '''
         self.data = {}
+        self.stats={spider.name:datetime.now()}
 
     def process_item(self,item, spider):
         '''
@@ -100,6 +101,11 @@ class TreeGenerationPipeline(object):
         exporter.finish_exporting()
         file.close()
         logging.info(suggestions)
+        self.stats[spider.name]=datetime.now()-self.stats[spider.name]
+        time_string = 'Total time elapsed for scraping: '+ str(self.stats[spider.name])
+        logging.info(time_string)
+        items_string = 'Total amount of scraped items: suggestions: '+str(spider.suggestions_counter)+', comments: '+str(spider.comments_counter)
+        logging.info(items_string)
 
     def sort_data(self, suggestions):
         '''

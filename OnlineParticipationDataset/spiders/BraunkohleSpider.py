@@ -11,7 +11,7 @@ class BraunkohleSpider(scrapy.Spider):
     custom_settings = {"DOWNLOADER_MIDDLEWARES": {'OnlineParticipationDataset.middlewares.JSMiddleware': 543,},
                        "ITEM_PIPELINES": {
                           # 'OnlineParticipationDataset.pipelines.OnlineparticipationdatasetPipeline': 300,
-                          # 'OnlineParticipationDataset.pipelines.JsonWriterPipeline': 300,
+                          'OnlineParticipationDataset.pipelines.JsonWriterPipeline': 300,
                           'OnlineParticipationDataset.pipelines.TreeGenerationPipeline': 400
 
                        }}
@@ -28,6 +28,8 @@ class BraunkohleSpider(scrapy.Spider):
         super(BraunkohleSpider, self).__init__(**kwargs)
         self.id_counter=count(start=0, step=1)
         self.link_counter=iter(self.urls)
+        self.suggestions_counter=0
+        self.comments_counter=0
         # self.driver = webdriver.Firefox()
 
     def extract_num_comments(self, response):
@@ -65,6 +67,7 @@ class BraunkohleSpider(scrapy.Spider):
         :param response: scrapy response
         :return: suggestion item
         '''
+        self.suggestions_counter+=1
         sug_item = items.SuggestionItem()
         #sug_item['id'] = response.css('.ecm_draftBillParagraphTabs>div>div>div::attr(id)').extract_first()
         sug_item['id'] = next(self.id_counter)
@@ -153,6 +156,7 @@ class BraunkohleSpider(scrapy.Spider):
         comment_list = []
         sub_iterator = iter(comment_sublists)
         for comment in comments:
+            self.comments_counter+=1
             # Populate current item
             tmp_comment = items.CommentItem()
             tmp_comment['author'] = self.get_author(comment)
