@@ -19,9 +19,13 @@ scrapy crawl bonn2011
 ```
 
 ## Supported datasets:
-| Dataset name | Link                                                                                                                                  | # Suggestions | # Comments | # Total | Crawl time | Command                |
-|--------------|---------------------------------------------------------------------------------------------------------------------------------------|---------------|------------|---------|------------|------------------------|
-| Bonn 2011    | [bonn-packts-an-2011.de](http://bonn-packts-an-2011.de/www.bonn-packts-an.de/dito/forumc0d2.html)                                     |               |            |         | 50 seconds | scrapy crawl bonn2011  |
-| Braunkohle   | [leitentscheidung-braunkohle.nrw](https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/9) |       7       |     1296   |         | 32 minutes | scrapy crawl braunkohle|
 
 
+| Dataset name | Link                                                                                                                                  | # Suggestions | # Comments | # Total | Crawl time | Command               |
+|--------------|---------------------------------------------------------------------------------------------------------------------------------------|---------------|------------|---------|------------|-----------------------|
+| Bonn 2011    | [bonn-packts-an-2011.de](http://bonn-packts-an-2011.de/www.bonn-packts-an.de/dito/forumc0d2.html)                                     |    1015       |    8903    |   9918   | 50 seconds | scrapy crawl bonn2011 |
+| Braunkohle   | [leitentscheidung-braunkohle.nrw](https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/chap/5#chapter) |       7       |     1296  |   1296      | 32 minutes | scrapy crawl braunkohle|
+
+###Note:
+Braunkohle-spider uses javascript to load content and needs to wait for server responses. This results in long crawltimes.
+Braunkohle-site only provides 7 suggestions.
