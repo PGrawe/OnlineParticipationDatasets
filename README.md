@@ -22,6 +22,6 @@ scrapy crawl bonn2011
 | Dataset name | Link                                                                                                                                  | # Suggestions | # Comments | # Total | Crawl time | Command                |
 |--------------|---------------------------------------------------------------------------------------------------------------------------------------|---------------|------------|---------|------------|------------------------|
 | Bonn 2011    | [bonn-packts-an-2011.de](http://bonn-packts-an-2011.de/www.bonn-packts-an.de/dito/forumc0d2.html)                                     |               |            |         | 50 seconds | scrapy crawl bonn2011  |
-| Braunkohle   | [leitentscheidung-braunkohle.nrw](https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/9) |       7       |     1513   |         | 32 minutes | scrapy crawl braunkohle|
+| Braunkohle   | [leitentscheidung-braunkohle.nrw](https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/9) |       7       |     1296   |         | 32 minutes | scrapy crawl braunkohle|
 
 

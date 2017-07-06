@@ -22,8 +22,8 @@ class BraunkohleSpider(scrapy.Spider):
                   'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/17',
                   'https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/16']
     start_urls = ['https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/9']
-    # urls = ['https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/12']
-    # start_urls = ['https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/11']
+    # urls = ['https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/14']
+    # start_urls = ['https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/para/17']
     def __init__(self, **kwargs):
         super(BraunkohleSpider, self).__init__(**kwargs)
         self.id_counter=count(start=0, step=1)
@@ -135,7 +135,8 @@ class BraunkohleSpider(scrapy.Spider):
         :param comment_sublist: comment-sublist (selector)
         :return: List of all comments (first level)
         '''
-        return comment_sublist.css('.ecm_commentSublist>.ecm_comment')
+        # return comment_sublist.css('.ecm_commentSublist>.ecm_comment')
+        return comment_sublist.xpath("div[@class='row ecm_comment' or @class='row ecm_comment ecm_comment_children']")
 
     def get_children_sublists(self, comment_sublist):
         '''
@@ -143,7 +144,8 @@ class BraunkohleSpider(scrapy.Spider):
         :param comment_sublist: comment-sublist (selector)
         :return: List of all sublists (first level)
         '''
-        return comment_sublist.css('.ecm_commentSublist>.ecm_commentSublist')
+        # return comment_sublist.css('.ecm_commentSublist>.ecm_commentSublist')
+        return comment_sublist.xpath("div[@class='ecm_commentSublist']")
 
     def create_comments(self, comments, comment_sublists, parent_id):
         '''
