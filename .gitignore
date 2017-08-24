@@ -65,5 +65,6 @@ target/
 #Ipython Notebook
 .ipynb_checkpoints
 
-#PyCharm
+#Editor stuff
 .idea/
+.vscode/
