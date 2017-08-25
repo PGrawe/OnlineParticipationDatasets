@@ -26,6 +26,7 @@ class SuggestionItem(scrapy.Item):
     parent = scrapy.Field(default='None')
     comment_count = scrapy.Field(default=0)
     comments = scrapy.Field(default=[])
+    tags = scrapy.Field(default=[])
 
 
 class CommentItem(scrapy.Item):

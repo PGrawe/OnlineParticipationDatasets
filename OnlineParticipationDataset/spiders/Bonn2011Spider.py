@@ -53,6 +53,12 @@ class Bonn2011Spider(scrapy.Spider):
             #       .extract_first()))
                 self.suggestion_summary_response(response).xpath('.//td[starts-with(.,"Kommentare")]/../td[@class="r"]/text()')
                 .extract_first())
+                
+    def parse_suggestion_tags(self, l):
+        return [s.rsplit('(',1)[0].strip() for s in l]
+
+    def suggestion_tags(self, response):
+        return self.parse_suggestion_tags(response.xpath('.//div[@class="kasten cloud"]/div[@class="text"]//a/text()').extract())
 
     def parse_datetime(self, s):
         return datetime.strptime(
@@ -190,6 +196,7 @@ class Bonn2011Spider(scrapy.Spider):
         suggestion_item['abstention'] = self.suggestion_abstention(response)
         suggestion_item['comment_count'] = self.suggestion_comment_count(response)
         suggestion_item['date_time'] = self.suggestion_datetime(response)
+        suggestion_item['tags'] = self.suggestion_tags(response)
         return suggestion_item
 
     def parse(self, response):
