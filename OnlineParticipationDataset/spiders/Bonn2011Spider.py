@@ -68,7 +68,7 @@ class Bonn2011Spider(scrapy.Spider):
         return self.parse_datetime(
                 response.xpath('.//div[@class="details"]/p/text()').extract_first())
 
-    def parse_datetime_commment(self, s):
+    def parse_datetime_comment(self, s):
         s = s.split("|")
         s = "-".join(s[1:])
         return self.parse_datetime(s)
@@ -99,7 +99,7 @@ class Bonn2011Spider(scrapy.Spider):
         return self.parse_comment_author(response.xpath('.//div[@class="user"]/text()').extract_first())
 
     def comment_datetime(self,response):
-        return self.parse_datetime_commment(response.xpath('.//div[@class="user"]/text()').extract_first())
+        return self.parse_datetime_comment(response.xpath('.//div[@class="user"]/text()').extract_first())
 
     def create_comment_item(self, response):
         """
@@ -143,7 +143,7 @@ class Bonn2011Spider(scrapy.Spider):
         """
         Parse list with CommentItems, see :class:`~OnlineParticipationDataset.items.CommentItem`, to restore the comment tree. Write parent and children to items. Items need to have values for level, commment_id and suggestion_id.
 
-        :param list with CommmentItems
+        :param item_list: list with CommmentItems
         :return list with CommmentItems
         """
         stack = []
