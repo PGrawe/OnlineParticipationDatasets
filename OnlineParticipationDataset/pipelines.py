@@ -85,15 +85,16 @@ class FlatJsonWriterPipeline(object):
 
             Creates list with suggestion and all its comments, all on one level.
         """
-        if not hasattr(item,'comments'):
+        if not 'comments' in item:
             return [item]
         item_list = item.pop('comments')
         i = 0
         # XXX List is changed while iterating it
         while i < len(item_list):
             # insert the children in between, right after the parent
-            comment_children = item_list[i].pop('children')
-            item_list = item_list[:i+1] + comment_children + item_list[i+1:]
+            if 'children' in item_list[i]:
+                comment_children = item_list[i].pop('children')
+                item_list = item_list[:i+1] + comment_children + item_list[i+1:]
             i += 1
         return [item] + item_list
 
