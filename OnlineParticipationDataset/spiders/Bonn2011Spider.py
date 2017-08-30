@@ -141,10 +141,10 @@ class Bonn2011Spider(scrapy.Spider):
 
     def parse_comment_tree(self, item_list):
         """
-        Parse list with CommentItems, see :class:`~OnlineParticipationDataset.items.CommentItem`, to restore the comment tree. Write parent and children to items. Items need to have values for level, commment_id and suggestion_id.
+        Parse list with CommentItems, see :class:`~OnlineParticipationDataset.items.CommentItem`, to restore the comment tree. Write parent and children to items. Items need to have values for level, comment_id and suggestion_id.
 
-        :param item_list: list with CommmentItems
-        :return list with CommmentItems
+        :param item_list: list with CommentItems
+        :return list with CommentItems
         """
         stack = []
         for position,item in enumerate(item_list):
