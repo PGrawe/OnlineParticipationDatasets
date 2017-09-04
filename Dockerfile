@@ -3,6 +3,7 @@ FROM python:3
 
 RUN echo "Europe/Berlin " > /etc/timezone
 RUN dpkg-reconfigure -f noninteractive tzdata
+RUN apt-get clean && apt-get update && apt-get install -y locales locales-all
 #RUN apt-get update
 #RUN apt-get install -y firefox
 #RUN wget https://github.com/mozilla/geckodriver/releases/download/v0.16.1/geckodriver-v0.16.1-linux64.tar.gz && \
