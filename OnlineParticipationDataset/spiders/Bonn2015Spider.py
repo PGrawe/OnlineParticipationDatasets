@@ -82,7 +82,7 @@ class Bonn2015Spider(scrapy.Spider):
     def comment_datetime(self, response):
         return self.parse_datetime_comment(response.xpath('./div/div[@class="comment-meta"]/header/div/text()').extract())
 
-    def create_comment_item(self, response, level=1):
+    def create_comment_item(self, response, suggestion_id_p, parent_id=None, level=1):
         """
         Create a CommentItem, see :class:`~OnlineParticipationDataset.items.CommentItem`, from given response.
 
@@ -91,10 +91,11 @@ class Bonn2015Spider(scrapy.Spider):
         """
         comment_item = items.CommentItem()
 
+        comment_item['suggestion_id'] = suggestion_id_p
+        if parent_id:
+            comment_item['parent_id'] = parent_id
         comment_item['level'] = level
         comment_item['comment_id'] = self.comment_id(response)
-        # should obtain it from higher function
-        # comment_item['suggestion_id'] = self.suggestion_id(response.xpath('//.'))
         comment_item['content'] = self.comment_content(response)
         comment_item['author'] = self.comment_author(response)
         comment_item['date_time'] = self.comment_datetime(response)
@@ -108,13 +109,13 @@ class Bonn2015Spider(scrapy.Spider):
             children_xpath = 'following-sibling::div[@class="indented"]/article'
 
         for child in response.xpath(children_xpath):
-            children_list.append(self.create_comment_item(child, level+1))
+            children_list.append(self.create_comment_item(child, suggestion_id_p, comment_item['comment_id'], level+1))
 
         comment_item['children'] = children_list
 
         return comment_item
 
-    def create_comment_item_list(self, response):
+    def create_comment_item_list(self, response, suggestion_id_p):
         """
         Create a list of CommentItems, see :class:`~OnlineParticipationDataset.items.CommentItem`, from given response.
 
@@ -125,7 +126,7 @@ class Bonn2015Spider(scrapy.Spider):
         comment_items = []
         # Get first level comments
         for comment in response.xpath('//section[@id="comments"]/div/article'):
-            comment_items.append(self.create_comment_item(comment))
+            comment_items.append(self.create_comment_item(comment, suggestion_id_p))
         return comment_items
 
     def create_suggestion_item(self, response):
@@ -176,5 +177,5 @@ class Bonn2015Spider(scrapy.Spider):
         :return: generator
         """
         suggestion = self.create_suggestion_item(response)
-        suggestion['comments'] = self.create_comment_item_list(response)
+        suggestion['comments'] = self.create_comment_item_list(response, suggestion['suggestion_id'])
         yield suggestion
