@@ -35,7 +35,7 @@ class Bonn2011Spider(scrapy.Spider):
     def get_suggestion_approval(self,response):
          return int(
              self.get_suggestion_summary_response(response).xpath('.//td[starts-with(@id,"votePro")]/text()')
-            .extract_first())
+            .extract_first() or 0)
 
     def get_suggestion_refusal(self,response):
         return int(
