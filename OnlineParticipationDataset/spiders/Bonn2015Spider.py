@@ -8,11 +8,10 @@ import locale
 class Bonn2015Spider(scrapy.Spider):
     name = "bonn2015"
     start_urls = ['https://www.bonn-macht-mit.de/dialog/bürgerbeteiligung-am-haushalt-20152016/bhh/online-diskussion']
-    comment_counter = 0
 
     def get_suggestion_id(self, response):
         return int(re.search('(?:node-)(\d+)',response.xpath('.//div[@class="panel-pane-content-inside"]/article/@class')
-                             .extract_first())[1])
+                             .extract_first())[1] or 0)
 
     def get_suggestion_author(self, response):
         return response.xpath('.//span[@class="username"]/text()').extract_first().strip()
@@ -36,19 +35,19 @@ class Bonn2015Spider(scrapy.Spider):
 
     def get_suggestion_approval(self, response):
          return int(response.xpath('.//span[@title="Pro votes"]/text()')
-                    .extract_first())
+                    .extract_first() or 0)
 
     def get_suggestion_refusal(self, response):
         return int(response.xpath('.//span[@title="Contra votes"]/text()')
-            .extract_first())
+            .extract_first() or 0)
 
     def get_suggestion_abstention(self, response):
         return int(response.xpath('.//span[@title="Neutral votes"]/text()')
-            .extract_first())
+            .extract_first() or 0)
 
     def get_suggestion_comment_count(self, response):
         return int(response.xpath('.//span[@class="count-comments count-icon"]/text()')
-                .extract_first())
+                .extract_first() or 0)
                 
     def get_suggestion_parse_datetime(self, s):
         return datetime.strptime(
