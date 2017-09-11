@@ -9,6 +9,10 @@ class Bonn2017Spider(scrapy.Spider):
     name = "bonn2017"
     start_urls = ['https://www.bonn-macht-mit.de/node/871']
 
+    def __init__(self, *args, **kwargs):
+        super(Bonn2017Spider, self).__init__(*args, **kwargs)
+        locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8')        
+
     def get_suggestion_id(self, response):
         return int(re.search('(?:node-)(\d+)',response.xpath('.//div[@class="panel-pane-content-inside"]/article/@class')
                              .extract_first())[1] or 0)
@@ -121,7 +125,6 @@ class Bonn2017Spider(scrapy.Spider):
         :param response: scrapy response
         :return: list with CommentItems
         """
-        locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8')
         comment_items = []
         # Get first level comments
         for comment in response.xpath('//section[@id="comments"]/div/article'):
