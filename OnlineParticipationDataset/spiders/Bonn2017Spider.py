@@ -32,7 +32,8 @@ class Bonn2017Spider(scrapy.Spider):
             './/div[@class="additional-infos"]//div[contains(@class,"field-name-field-proposal-financial-type")]//div[@class="field-item even"]/text()').extract_first()
 
     def parse_content(self, lines):
-        return ''.join(map(lambda s: s.strip(), lines))
+        # return ''.join(map(lambda s: s.strip(), lines))
+        return ''.join(lines)
 
     def get_suggestion_content(self, response):
         return self.parse_content(response.xpath('.//div[contains(@class,"node-main-content")]//p/text()').extract())
