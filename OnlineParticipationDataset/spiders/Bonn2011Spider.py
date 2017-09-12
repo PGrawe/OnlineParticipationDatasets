@@ -114,10 +114,10 @@ class Bonn2011Spider(scrapy.Spider):
         comment_item['level'] = int(comment_class[0])
         comment_item['comment_id'] = self.get_comment_id(response)
         comment_item['suggestion_id'] = suggestion_id
-        comment_item['content'] = self.get_comment_content(response)
-        comment_item['author'] = self.get_comment_author(response)
         comment_item['date_time'] = self.get_comment_datetime(response)
+        comment_item['author'] = self.get_comment_author(response)
         comment_item['title'] = self.get_comment_title(response)
+        comment_item['content'] = self.get_comment_content(response)
 
         # If official the id is located elsewhere
         # if len < 2 its an answer on a comment with vote
@@ -187,17 +187,17 @@ class Bonn2011Spider(scrapy.Spider):
         """
         suggestion_item = items.SuggestionItem()
         suggestion_item['suggestion_id'] = self.get_suggestion_id(response)
-        suggestion_item['author'] = self.get_suggestion_author(response)
         suggestion_item['title'] = self.get_suggestion_title(response)
-        suggestion_item['category'] = self.get_suggestion_category(response)
         suggestion_item['suggestion_type'] = self.get_suggestion_type(response)
-        suggestion_item['content'] = self.get_suggestion_content(response)
+        suggestion_item['date_time'] = self.get_suggestion_datetime(response)
+        suggestion_item['category'] = self.get_suggestion_category(response)
+        suggestion_item['author'] = self.get_suggestion_author(response)
         suggestion_item['approval'] = self.get_suggestion_approval(response)
         suggestion_item['refusal'] = self.get_suggestion_refusal(response)
         suggestion_item['abstention'] = self.get_suggestion_abstention(response)
-        suggestion_item['comment_count'] = self.get_suggestion_comment_count(response)
-        suggestion_item['date_time'] = self.get_suggestion_datetime(response)
         suggestion_item['tags'] = self.get_suggestion_tags(response)
+        suggestion_item['content'] = self.get_suggestion_content(response)
+        suggestion_item['comment_count'] = self.get_suggestion_comment_count(response)
         return suggestion_item
 
     def parse(self, response):
