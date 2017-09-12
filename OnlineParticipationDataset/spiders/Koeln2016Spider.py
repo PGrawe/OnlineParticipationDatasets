@@ -170,6 +170,7 @@ class Koeln2016Spider(scrapy.Spider):
         suggestion_item['approval'] = self.get_suggestion_approval(response)
         suggestion_item['refusal'] = self.get_suggestion_refusal(response)
         suggestion_item['content'] = self.get_suggestion_content(response)
+        suggestion_item['comment_count'] = 0
         suggestion_item['comments'] = []
         return suggestion_item
 
