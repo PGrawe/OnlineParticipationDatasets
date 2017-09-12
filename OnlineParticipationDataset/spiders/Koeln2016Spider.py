@@ -7,81 +7,81 @@ import locale
 
 class Koeln2016Spider(scrapy.Spider):
     name = "koeln2016"
-    start_urls = ['https://buergerhaushalt.stadt-koeln.de/2016/buergervorschlaege?sort_bef_combine=php%20ASC']
+    # start_urls = ['https://buergerhaushalt.stadt-koeln.de/2016/buergervorschlaege']
+    start_urls = ['https://buergerhaushalt.stadt-koeln.de/2016/buergervorschlaege?&sort_bef_combine=php+ASC']
+
+    def __init__(self, *args, **kwargs):
+        super(Koeln2016Spider, self).__init__(*args, **kwargs)
+        locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8') 
 
     def get_suggestion_id(self, response):
-        return int(re.search('(?:node-)(\d+)',response.xpath('.//div[@class="panel-pane-content-inside"]/article/@class')
-                             .extract_first())[1] or 0)
+        return int(response.xpath('//div[@class="id"]/text()')
+                             .extract_first() or 0)
 
     def get_suggestion_author(self, response):
-        return response.xpath('.//span[@class="username"]/text()').extract_first().strip()
+        return re.search('von (.+),',response.xpath('.//div[@class="grid-7"]/span[@class="meta"]/text()').extract_first())[1]
 
     def get_suggestion_title(self, response):
-        return response.xpath('.//h2[@class="node__title node-title"]/text()').extract_first().strip()
+        return response.xpath('.//div[@class="grid-7"]/h2/text()').extract_first().strip()
 
     def get_suggestion_category(self, response):
         return response.xpath(
-            './/div[@class="additional-infos"]//div[contains(@class,"field-name-field-category")]//div[@class="field-item even"]/text()').extract_first()
+            './/ul[@class="meta-list"]/li[starts-with(@class,"type")]/text()').extract_first()
 
-    def get_suggestion_type(self,response):
+    def get_suggestion_district(self,response):
         return response.xpath(
-            './/div[@class="additional-infos"]//div[contains(@class,"field-name-field-proposal-financial-type")]//div[@class="field-item even"]/text()').extract_first()
+            './/ul[@class="meta-list"]/li[@class="district"]/text()').extract_first()
 
     def parse_content(self, lines):
-        return ''.join(map(lambda s: s.strip(), lines))
+        # return ''.join(map(lambda s: s.strip(), lines))
+        return ''.join(lines)
 
     def get_suggestion_content(self, response):
-        return self.parse_content(response.xpath('.//div[contains(@class,"node-main-content")]//p/text()').extract())
+        return self.parse_content(response.xpath('.//div[@class="teaser"]/p/text()').extract())
 
     def get_suggestion_approval(self, response):
-         return int(response.xpath('.//span[@title="Pro votes"]/text()')
-                    .extract_first() or 0)
+         return int(response.xpath('.//dl[@class="thumb-up-down-rate mode1"]/dd[2]//div[@class="count"]/text()')
+                        .extract_first() or 0)
 
     def get_suggestion_refusal(self, response):
-        return int(response.xpath('.//span[@title="Contra votes"]/text()')
-            .extract_first() or 0)
-
-    def get_suggestion_abstention(self, response):
-        return int(response.xpath('.//span[@title="Neutral votes"]/text()')
-            .extract_first() or 0)
+        return int(response.xpath('.//dl[@class="thumb-up-down-rate mode1"]/dd[3]//div[@class="count"]/text()')
+                        .extract_first() or 0)
 
     def get_suggestion_comment_count(self, response):
         return int(response.xpath('.//span[@class="count-comments count-icon"]/text()')
                 .extract_first() or 0)
                 
-    def get_suggestion_parse_datetime(self, s):
+    def parse_suggestion_datetime(self, s):
         return datetime.strptime(
-            re.sub(r"(\s|[a-z])+", "", s.lower(), flags=re.UNICODE), '%d.%m.%Y')
+            re.search(r".*,\s(.+)\r",s)[1], '%d. %B - %H:%M').replace(year=2016)
 
     def get_suggestion_datetime(self, response):
-        return self.get_suggestion_parse_datetime(
-                response.xpath('.//p[@class="user-and-date inline"]/text()').extract()[1])
+        return self.parse_suggestion_datetime(
+                response.xpath('.//div[@class="grid-7"]/span[@class="meta"]/text()').extract_first())
 
     def parse_comment_id(self, s):
         if s is not None:
             return re.search(r"comment\-(\d+)", s)[1]
 
     def get_comment_id(self, response):
-        return self.parse_comment_id(response.xpath('./@id').extract_first())
+        return self.parse_comment_id(response.xpath('preceding-sibling::a/@id').extract()[-1])
 
     def get_comment_content(self, response):
-        return self.parse_content(response.xpath('./div/div[@class="comment-body"]//p/text()').extract())
+        return self.parse_content(response.xpath('./div[@class="content"]//p/text()').extract())
 
     def get_comment_title(self, response):
-        return response.xpath('./div/div[@class="comment-body"]/h3/a/text()').extract_first().strip()
+        return response.xpath('./h3/text()').extract_first().strip()
 
     def get_comment_author(self, response):
-        return response.xpath('./div/div[@class="comment-meta"]//span/text()').extract_first().strip()
+        return response.xpath('./div/span/span/text()').extract_first().strip()
 
     def parse_datetime_comment(self, l):
-        s = ' '.join([s.strip() for s in l])
-        s = s.replace('von','').strip()
-        return datetime.strptime(s, 'am %d. %b. %Y at %H:%MUhr')
+        return datetime.strptime(l, ' am %d. %B %Y - %H:%M Uhr')
 
     def get_comment_datetime(self, response):
-        return self.parse_datetime_comment(response.xpath('./div/div[@class="comment-meta"]/header/div/text()').extract())
+        return self.parse_datetime_comment(response.xpath('./div/span/text()').extract()[1])
 
-    def create_comment_item(self, response, suggestion_id, parent_id=None, level=1):
+    def create_comment_item(self, response, suggestion_id, level=1):
         """
         Create a CommentItem, see :class:`~OnlineParticipationDataset.items.CommentItem`, from given response.
 
@@ -91,8 +91,6 @@ class Koeln2016Spider(scrapy.Spider):
         comment_item = items.CommentItem()
 
         comment_item['suggestion_id'] = suggestion_id
-        if parent_id:
-            comment_item['parent_id'] = parent_id
         comment_item['level'] = level
         comment_item['comment_id'] = self.get_comment_id(response)
         comment_item['content'] = self.get_comment_content(response)
@@ -100,33 +98,60 @@ class Koeln2016Spider(scrapy.Spider):
         comment_item['date_time'] = self.get_comment_datetime(response)
         comment_item['title'] = self.get_comment_title(response)
 
-        children_list = []
-
-        if level == 1:
-            children_xpath = 'following-sibling::div/div[@class="indented"]/article'
-        else:
-            children_xpath = 'following-sibling::div[@class="indented"]/article'
-
-        for child in response.xpath(children_xpath):
-            children_list.append(self.create_comment_item(child, suggestion_id, comment_item['comment_id'], level+1))
-
-        comment_item['children'] = children_list
-
         return comment_item
 
-    def create_comment_item_list(self, response, suggestion_id):
+    def create_comment_item_list(self, response, level=1):
         """
         Create a list of CommentItems, see :class:`~OnlineParticipationDataset.items.CommentItem`, from given response.
 
         :param response: scrapy response
         :return: list with CommentItems
         """
-        locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8')
         comment_items = []
-        # Get first level comments
-        for comment in response.xpath('//section[@id="comments"]/div/article'):
-            comment_items.append(self.create_comment_item(comment, suggestion_id))
+        suggestion_id = self.get_suggestion_id(response)
+
+        if level == 1:
+            comment_path = './/div[@id="comments"]/div[starts-with(@class,"comment") or @class="indented"]'
+        else: # is indented comment
+            comment_path = './div[starts-with(@class,"comment") or @class="indented"]'
+
+        for div in response.xpath(comment_path):
+            if div.xpath('@class').extract_first() == "indented":
+                # Create indented comment list
+                comment_items += self.create_comment_item_list(div,level+1)
+            else:
+                # create comment
+                comment_items.append(self.create_comment_item(div,suggestion_id,level))
+
         return comment_items
+
+    def parse_comment_tree(self, item_list):
+        """
+        Parse list with CommentItems, see :class:`~OnlineParticipationDataset.items.CommentItem`, to restore the comment tree. Write parent and children to items. Items need to have values for level, comment_id and suggestion_id.
+
+        :param item_list: list with CommentItems
+        :return list with CommentItems
+        """
+        stack = []
+        for position,item in enumerate(item_list):
+            item['children'] = []
+            while(len(stack) >= item['level']):
+                stack.pop()
+            # Check if not first level, i.e. stack not is empty
+            # i.e. Top-Level got not parent_id
+            if stack:
+                # (pos,id)
+                parent_tuple = stack[-1]
+                # Parent is the last seen item
+                item['parent_id'] = parent_tuple[1]
+                # Add current item as child to parent
+                item_list[parent_tuple[0]]['children'].append(item)
+            # else:
+            #     # Top-Level Comments
+            #     item['parent_id'] = item['suggestion_id']
+            stack.append(tuple((position,item['comment_id'])))
+        return list(filter(lambda x: x['level'] <= 1, item_list))
+
 
     def create_suggestion_item(self, response):
         """
@@ -140,13 +165,12 @@ class Koeln2016Spider(scrapy.Spider):
         suggestion_item['author'] = self.get_suggestion_author(response)
         suggestion_item['title'] = self.get_suggestion_title(response)
         suggestion_item['category'] = self.get_suggestion_category(response)
-        suggestion_item['suggestion_type'] = self.get_suggestion_type(response)
+        suggestion_item['district'] = self.get_suggestion_district(response)
         suggestion_item['content'] = self.get_suggestion_content(response)
         suggestion_item['approval'] = self.get_suggestion_approval(response)
         suggestion_item['refusal'] = self.get_suggestion_refusal(response)
-        suggestion_item['abstention'] = self.get_suggestion_abstention(response)
-        suggestion_item['comment_count'] = self.get_suggestion_comment_count(response)
         suggestion_item['date_time'] = self.get_suggestion_datetime(response)
+        suggestion_item['comments'] = []
         return suggestion_item
 
     def parse(self, response):
@@ -163,10 +187,10 @@ class Koeln2016Spider(scrapy.Spider):
 
 
         # Parse next Site
-        next_page = response.xpath(
-            '//div[@class="item-list"]/ul[@class="pager clearfix"]/li[@class="pager-next"]/a/@href').extract_first()
-        if next_page:
-            yield response.follow(next_page, self.parse)
+        # next_page = response.xpath(
+        #     '//div[@class="item-list"]/ul[@class="pager clearfix"]/li[@class="pager-next"]/a/@href').extract_first()
+        # if next_page:
+        #     yield response.follow(next_page, self.parse)
 
     def parse_thread(self, response):
         """
@@ -176,5 +200,21 @@ class Koeln2016Spider(scrapy.Spider):
         :return: generator
         """
         suggestion = self.create_suggestion_item(response)
-        suggestion['comments'] = self.create_comment_item_list(response, suggestion['suggestion_id'])
+        suggestion['comments'] = self.create_comment_item_list(response)
         yield suggestion
+        # if response.meta['suggestion']:
+        #     suggestion = response.meta['suggestion']
+        # else:
+        #     suggestion = self.create_suggestion_item(response)
+        # # get comments of current page
+        # suggestion['comments'] += self.create_comment_item_list(response)
+        # next_page = response.xpath(
+        #     '//div[@class="item-list"]/ul[@class="pager clearfix"]/li[@class="pager-next"]/a/@href').extract_first()
+        # if next_page:
+        #     request = response.follow(next_page, self.parse_thread)
+        #     request.meta['suggestion'] = suggestion
+        #     yield request
+        # else:
+        #     # parse comment_list 
+        #     yield suggestion
+
