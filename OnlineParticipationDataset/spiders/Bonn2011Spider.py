@@ -114,6 +114,7 @@ class Bonn2011Spider(scrapy.Spider):
         comment_item['level'] = int(comment_class[0])
         comment_item['comment_id'] = self.get_comment_id(response)
         comment_item['suggestion_id'] = suggestion_id
+        comment_item['parent_id'] = 0
         comment_item['date_time'] = self.get_comment_datetime(response)
         comment_item['author'] = self.get_comment_author(response)
         comment_item['title'] = self.get_comment_title(response)
