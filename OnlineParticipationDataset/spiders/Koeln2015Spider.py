@@ -47,10 +47,6 @@ class Koeln2015Spider(scrapy.Spider):
         return int(response.xpath('.//dl[@class="thumb-up-down-rate mode1"]/dd[3]//div[@class="count"]/text()')
                         .extract_first() or 0)
 
-    def get_suggestion_comment_count(self, response):
-        return int(response.xpath('.//span[@class="count-comments count-icon"]/text()')
-                .extract_first() or 0)
-                
     def parse_suggestion_datetime(self, s):
         return datetime.strptime(
             re.search(r".*,\s(.+)\r",s)[1], '%d. %B - %H:%M').replace(year=2014)

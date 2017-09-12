@@ -46,10 +46,6 @@ class Koeln2016Spider(scrapy.Spider):
     def get_suggestion_refusal(self, response):
         return int(response.xpath('.//dl[@class="thumb-up-down-rate mode1"]/dd[3]//div[@class="count"]/text()')
                         .extract_first() or 0)
-
-    def get_suggestion_comment_count(self, response):
-        return int(response.xpath('.//span[@class="count-comments count-icon"]/text()')
-                .extract_first() or 0)
                 
     def parse_suggestion_datetime(self, s):
         return datetime.strptime(
