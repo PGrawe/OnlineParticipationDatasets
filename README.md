@@ -27,6 +27,7 @@ scrapy crawl <dataset>
 | Bonn 2015 |[bonn-macht-mit 2015/2016](https://www.bonn-macht-mit.de/dialog/bürgerbeteiligung-am-haushalt-20152016/bhh/online-diskussion) | 335 | 2,937 | 3271 | 27 seconds | scrapy crawl bonn2015 |
 | Bonn 2017 |[bonn-macht-mit 2017/2018](https://www.bonn-macht-mit.de/node/871) | 55 | 109 | 164 | 5 seconds | scrapy crawl bonn2017 |
 | Braunkohle <sup>[1](#myfootnote1)</sup>| [leitentscheidung-braunkohle.nrw](https://www.leitentscheidung-braunkohle.nrw/perspektiven/de/home/beteiligen/draftbill/47589/chap/5#chapter) | 7 | 1296 | 1296 | 32 minutes | scrapy crawl braunkohle|
+| Köln 2013 | [buergerhaushalt.stadt-koeln.de/2013/buergervorschlaege](https://buergerhaushalt.stadt-koeln.de/2013/buergervorschlaege?&sort_bef_combine=php+ASC) | 592 | 3095 | 3,687 | 5 minutes | scrapy crawl koeln2013|
 | Köln 2015 | [buergerhaushalt.stadt-koeln.de/2015/buergervorschlaege](https://buergerhaushalt.stadt-koeln.de/2015/buergervorschlaege?&sort_bef_combine=php+ASC) | 631 | 1855 | 2,486 | 10 minutes | scrapy crawl koeln2015|
 | Köln 2016 | [buergerhaushalt.stadt-koeln.de/2016/buergervorschlaege](https://buergerhaushalt.stadt-koeln.de/2016/buergervorschlaege?&sort_bef_combine=php+ASC) | 827 | 1314 | 2,141 | 9 minutes | scrapy crawl koeln2016|
 
