@@ -198,7 +198,10 @@ class Koeln2016Spider(scrapy.Spider):
         :param response: scrapy response
         :return: generator
         """
-        suggestion = response.meta.get('suggestion', self.create_suggestion_item(response))
+        if 'suggestion' in response.meta:
+            suggestion = response.meta['suggestion']
+        else:
+            suggestion = self.create_suggestion_item(response)
         # get comments of current page
         suggestion['comments'] += self.create_comment_item_list(response)
         next_page = response.xpath(
