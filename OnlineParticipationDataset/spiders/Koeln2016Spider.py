@@ -61,7 +61,7 @@ class Koeln2016Spider(scrapy.Spider):
 
     def parse_comment_id(self, s):
         if s is not None:
-            return re.search(r"comment\-(\d+)", s)[1]
+            return int(re.search(r"comment\-(\d+)", s)[1],0)
 
     def get_comment_id(self, response):
         return self.parse_comment_id(response.xpath('preceding-sibling::a/@id').extract()[-1])
@@ -187,10 +187,10 @@ class Koeln2016Spider(scrapy.Spider):
 
 
         # Parse next Site
-        # next_page = response.xpath(
-        #     '//div[@class="item-list"]/ul[@class="pager clearfix"]/li[@class="pager-next"]/a/@href').extract_first()
-        # if next_page:
-        #     yield response.follow(next_page, self.parse)
+        next_page = response.xpath(
+            '//div[@class="item-list"]/ul[@class="pager clearfix"]/li[@class="pager-next"]/a/@href').extract_first()
+        if next_page:
+            yield response.follow(next_page, self.parse)
 
     def parse_thread(self, response):
         """
@@ -199,22 +199,17 @@ class Koeln2016Spider(scrapy.Spider):
         :param response: scrapy response
         :return: generator
         """
-        suggestion = self.create_suggestion_item(response)
-        suggestion['comments'] = self.create_comment_item_list(response)
-        yield suggestion
-        # if response.meta['suggestion']:
-        #     suggestion = response.meta['suggestion']
-        # else:
-        #     suggestion = self.create_suggestion_item(response)
-        # # get comments of current page
-        # suggestion['comments'] += self.create_comment_item_list(response)
-        # next_page = response.xpath(
-        #     '//div[@class="item-list"]/ul[@class="pager clearfix"]/li[@class="pager-next"]/a/@href').extract_first()
-        # if next_page:
-        #     request = response.follow(next_page, self.parse_thread)
-        #     request.meta['suggestion'] = suggestion
-        #     yield request
-        # else:
-        #     # parse comment_list 
-        #     yield suggestion
+        suggestion = response.meta.get('suggestion', self.create_suggestion_item(response))
+        # get comments of current page
+        suggestion['comments'] += self.create_comment_item_list(response)
+        next_page = response.xpath(
+            '//div[@class="item-list"]/ul[@class="pager clearfix"]/li[@class="pager-next"]/a/@href').extract_first()
+        if next_page:
+            request = response.follow(next_page, self.parse_thread)
+            request.meta['suggestion'] = suggestion
+            yield request
+        else:
+            suggestion['comment_count'] = len(suggestion['comments'])
+            suggestion['comments'] = self.parse_comment_tree(suggestion['comments'])
+            yield suggestion
 
