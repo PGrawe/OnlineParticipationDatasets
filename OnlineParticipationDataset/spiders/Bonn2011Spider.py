@@ -75,13 +75,13 @@ class Bonn2011Spider(scrapy.Spider):
 
     def parse_comment_id(self, s):
         if s is not None:
-            return re.search(r"ID\:\D*(\d+)",s)[1]
+            return int(re.search(r"ID\:\D*(\d+)",s)[1],0)
 
     def get_comment_id(self,response):
         return self.parse_comment_id(response.xpath('.//div[@class="col_01"]/comment()').extract_first())
 
     def parse_comment_id_official(self,s):
-        return re.search(r"Nr\.\s*(\d+)",s)[1]
+        return int(re.search(r"Nr\.\s*(\d+)",s)[1],0)
 
     def get_comment_id_official(self,response):
         return self.parse_comment_id_official(response.xpath('.//div[@class="user"]/text()').extract_first())
@@ -114,7 +114,8 @@ class Bonn2011Spider(scrapy.Spider):
         comment_item['level'] = int(comment_class[0])
         comment_item['comment_id'] = self.get_comment_id(response)
         comment_item['suggestion_id'] = suggestion_id
-        comment_item['parent_id'] = 0
+        if int(comment_class[0]) > 1:
+            comment_item['parent_id'] = 0
         comment_item['date_time'] = self.get_comment_datetime(response)
         comment_item['author'] = self.get_comment_author(response)
         comment_item['title'] = self.get_comment_title(response)

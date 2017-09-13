@@ -64,7 +64,7 @@ class Bonn2015Spider(scrapy.Spider):
 
     def parse_comment_id(self, s):
         if s is not None:
-            return re.search(r"comment\-(\d+)", s)[1]
+            return int(re.search(r"comment\-(\d+)", s)[1],0)
 
     def get_comment_id(self, response):
         return self.parse_comment_id(response.xpath('./@id').extract_first())
