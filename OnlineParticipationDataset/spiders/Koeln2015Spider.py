@@ -98,7 +98,7 @@ class Koeln2015Spider(scrapy.Spider):
 
         return comment_item
 
-    def create_comment_item_list(self, response, level=1):
+    def create_comment_item_list(self, response, suggestion_id, level=1):
         """
         Create a list of CommentItems, see :class:`~OnlineParticipationDataset.items.CommentItem`, from given response.
 
@@ -106,7 +106,6 @@ class Koeln2015Spider(scrapy.Spider):
         :return: list with CommentItems
         """
         comment_items = []
-        suggestion_id = self.get_suggestion_id(response)
 
         if level == 1:
             comment_path = './/div[@id="comments"]/div[starts-with(@class,"comment") or @class="indented"]'
@@ -116,10 +115,10 @@ class Koeln2015Spider(scrapy.Spider):
         for div in response.xpath(comment_path):
             if div.xpath('@class').extract_first() == "indented":
                 # Create indented comment list
-                comment_items += self.create_comment_item_list(div,level+1)
+                comment_items += self.create_comment_item_list(div, suggestion_id, level+1)
             else:
                 # create comment
-                comment_items.append(self.create_comment_item(div,suggestion_id,level))
+                comment_items.append(self.create_comment_item(div, suggestion_id, level))
 
         return comment_items
 
@@ -148,7 +147,8 @@ class Koeln2015Spider(scrapy.Spider):
             #     # Top-Level Comments
             #     item['parent_id'] = item['suggestion_id']
             stack.append(tuple((position,item['comment_id'])))
-        return list(filter(lambda x: x['level'] <= 1, item_list))
+        return [item for item in item_list if item['level'] <= 1]
+
 
 
     def create_suggestion_item(self, response):
@@ -203,7 +203,7 @@ class Koeln2015Spider(scrapy.Spider):
         else:
             suggestion = self.create_suggestion_item(response)
         # get comments of current page
-        suggestion['comments'] += self.create_comment_item_list(response)
+        suggestion['comments'] += self.create_comment_item_list(response, suggestion['suggestion_id'])
         next_page = response.xpath(
             '//div[@class="item-list"]/ul[@class="pager clearfix"]/li[@class="pager-next"]/a/@href').extract_first()
         if next_page:
