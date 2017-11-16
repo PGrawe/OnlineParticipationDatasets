@@ -8,41 +8,45 @@ class Bonn2011Spider(scrapy.Spider):
     name = "bonn2011"
     start_urls = ['http://bonn-packts-an-2011.de/www.bonn-packts-an.de/dito/forumc0d2.html']
 
-    def get_suggestion_id(self,response):
+    def get_suggestion_id(self, response):
         return (re.search('([A-Z]\d+)',response.xpath('.//div[starts-with(@class,"vorschlag")]/h2/text()')
             .extract_first()))[0]
 
-    def get_suggestion_author(self,response):
+    def get_suggestion_author(self, response):
         return (re.search('(?:von\s)(\w+)',response.xpath('.//div[starts-with(@class,"vorschlag")]/h2/text()')
             .extract_first()))[1]
 
-    def get_suggestion_title(self,response):
+    def get_suggestion_title(self, response):
         return response.xpath('.//div[@class="col_01"]/h3/text()').extract_first()
 
-    def get_suggestion_category(self,response):
+    def get_suggestion_category(self, response):
         return response.xpath(
             './/div[starts-with(@class,"vorschlag")]/div[@class="image"]/img/@title').extract_first()
 
-    def get_suggestion_type(self,response):
+    def get_suggestion_type(self, response):
         return response.xpath('.//div[@class="col_01"]/strong/text()').extract_first()
 
-    def get_suggestion_content(sef,response):
-        return response.xpath('.//div[@class="col_01"]/p/text()').extract_first()
+    def parse_content(self, lines):
+    # return ''.join(map(lambda s: s.strip(), lines))
+        return ''.join(lines).strip()
 
-    def get_suggestion_summary_response(self,response):
+    def get_suggestion_content(self, response):
+        return self.parse_content(response.xpath('.//div[starts-with(@class,"vorschlag")]/div[@class="col_01"]/p/text()').extract())
+
+    def get_suggestion_summary_response(self, response):
         return response.xpath('.//div[@class="col_01"]/table')
 
-    def get_suggestion_approval(self,response):
+    def get_suggestion_approval(self, response):
          return int(
              self.get_suggestion_summary_response(response).xpath('.//td[starts-with(@id,"votePro")]/text()')
             .extract_first() or 0)
 
-    def get_suggestion_refusal(self,response):
+    def get_suggestion_refusal(self, response):
         return int(
             self.get_suggestion_summary_response(response).xpath('.//td[starts-with(@id,"voteContra")]/text()')
             .extract_first())
 
-    def get_suggestion_abstention(self,response):
+    def get_suggestion_abstention(self, response):
         return int(
             self.get_suggestion_summary_response(response).xpath('.//td[starts-with(@id,"voteNeutral")]/text()')
             .extract_first())
@@ -64,7 +68,7 @@ class Bonn2011Spider(scrapy.Spider):
         return datetime.strptime(
             re.sub(r"(\s|[a-z])+", "", s.lower(), flags=re.UNICODE),'%d.%m.%Y-%H:%M')
 
-    def get_suggestion_datetime(self,response):
+    def get_suggestion_datetime(self, response):
         return self.parse_datetime(
                 response.xpath('.//div[@class="details"]/p/text()').extract_first())
 
@@ -77,28 +81,28 @@ class Bonn2011Spider(scrapy.Spider):
         if s is not None:
             return int(re.search(r"ID\:\D*(\d+)",s)[1],0)
 
-    def get_comment_id(self,response):
+    def get_comment_id(self, response):
         return self.parse_comment_id(response.xpath('.//div[@class="col_01"]/comment()').extract_first())
 
-    def parse_comment_id_official(self,s):
+    def parse_comment_id_official(self, s):
         return int(re.search(r"Nr\.\s*(\d+)",s)[1],0)
 
-    def get_comment_id_official(self,response):
+    def get_comment_id_official(self, response):
         return self.parse_comment_id_official(response.xpath('.//div[@class="user"]/text()').extract_first())
 
-    def get_comment_content(self,response):
-        return response.xpath('.//div[@class="col_01"]/p/text()').extract_first().strip()
+    def get_comment_content(self, response):
+        return self.parse_content(response.xpath('.//div[@class="col_01"]/p/text()').extract())
 
-    def get_comment_title(self,response):
+    def get_comment_title(self, response):
         return response.xpath('.//div[@class="col_01"]/h2/text()').extract_first().strip()
 
-    def parse_comment_author(self,s):
+    def parse_comment_author(self, s):
         return re.search(r"von\s+(\w+)\s+",s)[1]
 
-    def get_comment_author(self,response):
+    def get_comment_author(self, response):
         return self.parse_comment_author(response.xpath('.//div[@class="user"]/text()').extract_first())
 
-    def get_comment_datetime(self,response):
+    def get_comment_datetime(self, response):
         return self.parse_datetime_comment(response.xpath('.//div[@class="user"]/text()').extract_first())
 
     def create_comment_item(self, response, suggestion_id):
