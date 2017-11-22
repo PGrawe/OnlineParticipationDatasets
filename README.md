@@ -33,5 +33,6 @@ scrapy crawl <dataset>
 | Köln 2016 | [buergerhaushalt.stadt-koeln.de/2016/buergervorschlaege](https://buergerhaushalt.stadt-koeln.de/2016/buergervorschlaege?&sort_bef_combine=php+ASC) | 827 | 1314 | 2141 | 9 minutes | scrapy crawl koeln2016|
 | Raddialog Bonn | [raddialog.bonn.de/dialoge](https://www.raddialog.bonn.de/dialoge/bonner-rad-dialog?sort_bef_combine=created%20ASC) | 2331 | 2425 | 4756 | 54 minutes | scrapy crawl raddialog-bonn|
 | Raddialog Koeln | [raddialog-ehrenfeld.koeln.de/dialoge](http://www.raddialog-ehrenfeld.koeln/dialoge/ehrenfelder-raddialog?sort_bef_combine=created%20ASC) | 378 | 277 | 655 | 2 minutes | scrapy crawl raddialog-koeln|
+| Raddialog Moers | [raddialog.moers.de/dialoge](https://www.raddialog.moers.de/node/1384?sort_bef_combine=created%20ASC) | 463 | 300 | 763 | 3 minutes | scrapy crawl raddialog-moers|
 
 <a name="myfootnote1">1</a>: Braunkohle-spider uses javascript to load content and needs to wait for server responses. This results in long crawltimes.Braunkohle-site only provides 7 suggestions.
