@@ -1,5 +1,5 @@
 import scrapy
-from OnlineParticipationDataset import items
+from OnlineParticipationDatasets import items
 from datetime import datetime
 import re
 import locale
@@ -79,7 +79,7 @@ class Koeln2015Spider(scrapy.Spider):
 
     def create_comment_item(self, response, suggestion_id, level=1):
         """
-        Create a CommentItem, see :class:`~OnlineParticipationDataset.items.CommentItem`, from given response.
+        Create a CommentItem, see :class:`~OnlineParticipationDatasetsitems.CommentItem`, from given response.
 
         :param response: scrapy response
         :return: scrapy item
@@ -100,7 +100,7 @@ class Koeln2015Spider(scrapy.Spider):
 
     def create_comment_item_list(self, response, suggestion_id, level=1):
         """
-        Create a list of CommentItems, see :class:`~OnlineParticipationDataset.items.CommentItem`, from given response.
+        Create a list of CommentItems, see :class:`~OnlineParticipationDatasetsitems.CommentItem`, from given response.
 
         :param response: scrapy response
         :return: list with CommentItems
@@ -124,7 +124,7 @@ class Koeln2015Spider(scrapy.Spider):
 
     def parse_comment_tree(self, item_list):
         """
-        Parse list with CommentItems, see :class:`~OnlineParticipationDataset.items.CommentItem`, to restore the comment tree. Write parent and children to items. Items need to have values for level, comment_id and suggestion_id.
+        Parse list with CommentItems, see :class:`~OnlineParticipationDatasetsitems.CommentItem`, to restore the comment tree. Write parent and children to items. Items need to have values for level, comment_id and suggestion_id.
 
         :param item_list: list with CommentItems
         :return list with CommentItems
@@ -153,7 +153,7 @@ class Koeln2015Spider(scrapy.Spider):
 
     def create_suggestion_item(self, response):
         """
-        Create a SuggestionItem, see :class:`~OnlineParticipationDataset.items.SuggestionItem`, from given response.
+        Create a SuggestionItem, see :class:`~OnlineParticipationDatasetsitems.SuggestionItem`, from given response.
 
         :param response: scrapy response
         :return: scrapy item
@@ -193,7 +193,7 @@ class Koeln2015Spider(scrapy.Spider):
 
     def parse_thread(self, response):
         """
-        Parse thread and yield a SuggestionItem, see :class:`~OnlineParticipationDataset.items.SuggestionItem`.
+        Parse thread and yield a SuggestionItem, see :class:`~OnlineParticipationDatasetsitems.SuggestionItem`.
 
         :param response: scrapy response
         :return: generator

@@ -1,6 +1,6 @@
 import scrapy
-from OnlineParticipationDataset import items
-from OnlineParticipationDataset.spiders.Bonn2017Spider import Bonn2017Spider
+from OnlineParticipationDatasets import items
+from OnlineParticipationDatasets.spiders.Bonn2017Spider import Bonn2017Spider
 from datetime import datetime
 import re
 import locale
@@ -89,7 +89,7 @@ class Bonn2015Spider(Bonn2017Spider):
 
     # def create_comment_item(self, response, suggestion_id, parent_id=None, level=1):
     #     """
-    #     Create a CommentItem, see :class:`~OnlineParticipationDataset.items.CommentItem`, from given response.
+    #     Create a CommentItem, see :class:`~OnlineParticipationDatasetsitems.CommentItem`, from given response.
 
     #     :param response: scrapy response
     #     :return: scrapy item
@@ -122,7 +122,7 @@ class Bonn2015Spider(Bonn2017Spider):
 
     # def create_comment_item_list(self, response, suggestion_id):
     #     """
-    #     Create a list of CommentItems, see :class:`~OnlineParticipationDataset.items.CommentItem`, from given response.
+    #     Create a list of CommentItems, see :class:`~OnlineParticipationDatasetsitems.CommentItem`, from given response.
 
     #     :param response: scrapy response
     #     :return: list with CommentItems
@@ -135,7 +135,7 @@ class Bonn2015Spider(Bonn2017Spider):
 
     # def create_suggestion_item(self, response):
     #     """
-    #     Create a SuggestionItem, see :class:`~OnlineParticipationDataset.items.SuggestionItem`, from given response.
+    #     Create a SuggestionItem, see :class:`~OnlineParticipationDatasetsitems.SuggestionItem`, from given response.
 
     #     :param response: scrapy response
     #     :return: scrapy item
@@ -175,7 +175,7 @@ class Bonn2015Spider(Bonn2017Spider):
 
     # def parse_thread(self, response):
     #     """
-    #     Parse thread and yield a SuggestionItem, see :class:`~OnlineParticipationDataset.items.SuggestionItem`.
+    #     Parse thread and yield a SuggestionItem, see :class:`~OnlineParticipationDatasetsitems.SuggestionItem`.
 
     #     :param response: scrapy response
     #     :return: generator

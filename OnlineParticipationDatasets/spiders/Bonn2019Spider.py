@@ -1,6 +1,6 @@
 import scrapy
-from OnlineParticipationDataset import items
-from OnlineParticipationDataset.spiders.Bonn2017Spider import Bonn2017Spider
+from OnlineParticipationDatasets import items
+from OnlineParticipationDatasets.spiders.Bonn2017Spider import Bonn2017Spider
 from datetime import datetime
 import re
 import locale

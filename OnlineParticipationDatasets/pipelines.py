@@ -14,7 +14,7 @@ from scrapy.exporters import JsonItemExporter
 path = "downloads"
 
 
-class OnlineparticipationdatasetPipeline(object):
+class OnlineparticipationdatasetsPipeline(object):
     def process_item(self, item, spider):
         return item
 

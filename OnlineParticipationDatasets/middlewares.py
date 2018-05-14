@@ -55,7 +55,7 @@ class JSMiddleware(object):
         driver.close()
         return HtmlResponse(current_url, body=body, encoding='utf-8', request=request)
 
-class OnlineparticipationdatasetSpiderMiddleware(object):
+class OnlineparticipationdatasetsSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the spider middleware does not modify the
     # passed objects.

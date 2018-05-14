@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Scrapy settings for OnlineParticipationDataset project
+# Scrapy settings for OnlineParticipationDatasetss project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -9,10 +9,10 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'OnlineParticipationDataset'
+BOT_NAME = 'OnlineParticipationDatasets'
 
-SPIDER_MODULES = ['OnlineParticipationDataset.spiders']
-NEWSPIDER_MODULE = 'OnlineParticipationDataset.spiders'
+SPIDER_MODULES = ['OnlineParticipationDatasets.spiders']
+NEWSPIDER_MODULE = 'OnlineParticipationDatasets.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
@@ -47,13 +47,13 @@ DOWNLOAD_DELAY = 0
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    'OnlineParticipationDataset.middlewares.OnlineparticipationdatasetSpiderMiddleware': 543,
+#    'OnlineParticipationDatasets.middlewares.OnlineparticipationdatasetsSpiderMiddleware': 543,
 #}
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 # DOWNLOADER_MIDDLEWARES = {
-#    'OnlineParticipationDataset.middlewares.JSMiddleware': 543,
+#    'OnlineParticipationDatasets.middlewares.JSMiddleware': 543,
 # }
 
 # Enable or disable extensions
@@ -65,10 +65,10 @@ DOWNLOAD_DELAY = 0
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   # 'OnlineParticipationDataset.pipelines.OnlineparticipationdatasetPipeline': 300,
-   'OnlineParticipationDataset.pipelines.JsonWriterPipeline': 300,
-   'OnlineParticipationDataset.pipelines.FlatJsonWriterPipeline': 400,
-   # 'OnlineParticipationDataset.pipelines.TreeGenerationPipeline': 400
+   # 'OnlineParticipationDatasets.pipelines.OnlineparticipationdatasetsPipeline': 300,
+   'OnlineParticipationDatasets.pipelines.JsonWriterPipeline': 300,
+   'OnlineParticipationDatasets.pipelines.FlatJsonWriterPipeline': 400,
+   # 'OnlineParticipationDatasets.pipelines.TreeGenerationPipeline': 400
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

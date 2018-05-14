@@ -1,22 +1,21 @@
 import scrapy
-from OnlineParticipationDataset import items
+from OnlineParticipationDatasets import items
 from datetime import datetime
 import re
 import locale
 
 
-class Koeln2016Spider(scrapy.Spider):
-    name = "koeln2016"
-    # start_urls = ['https://buergerhaushalt.stadt-koeln.de/2016/buergervorschlaege']
-    start_urls = ['https://buergerhaushalt.stadt-koeln.de/2016/buergervorschlaege?&sort_bef_combine=php+ASC']
+class Koeln2013Spider(scrapy.Spider):
+    name = "koeln2013"
+    # start_urls = ['https://buergerhaushalt.stadt-koeln.de/2013/buergervorschlaege']
+    start_urls = ['https://buergerhaushalt.stadt-koeln.de/2013/buergervorschlaege?&sort_bef_combine=php+ASC']
 
     def __init__(self, *args, **kwargs):
-        super(Koeln2016Spider, self).__init__(*args, **kwargs)
+        super(Koeln2013Spider, self).__init__(*args, **kwargs)
         locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8') 
 
     def get_suggestion_id(self, response):
-        return int(response.xpath('//div[@class="id"]/text()')
-                             .extract_first() or 0)
+        return response.xpath('//div[@class="id"]/text()').extract_first()
 
     def get_suggestion_author(self, response):
         return re.search('von (.+),',response.xpath('.//div[@class="grid-7"]/span[@class="meta"]/text()').extract_first())[1]
@@ -49,7 +48,7 @@ class Koeln2016Spider(scrapy.Spider):
                 
     def parse_suggestion_datetime(self, s):
         return datetime.strptime(
-            re.search(r".*,\s(.+)\r",s)[1], '%d. %B - %H:%M').replace(year=2016)
+            re.search(r".*,\s(.+)\n",s)[1], '%d. %B - %H:%M').replace(year=2013)
 
     def get_suggestion_datetime(self, response):
         return self.parse_suggestion_datetime(
@@ -72,14 +71,14 @@ class Koeln2016Spider(scrapy.Spider):
         return response.xpath('./div/span/span/text()').extract_first().strip()
 
     def parse_datetime_comment(self, l):
-        return datetime.strptime(l, ' am %d. %B %Y - %H:%M Uhr')
+        return datetime.strptime(l, ' am %d %B, %Y - %H:%M Uhr')
 
     def get_comment_datetime(self, response):
         return self.parse_datetime_comment(response.xpath('./div/span/text()').extract()[1])
 
     def create_comment_item(self, response, suggestion_id, level=1):
         """
-        Create a CommentItem, see :class:`~OnlineParticipationDataset.items.CommentItem`, from given response.
+        Create a CommentItem, see :class:`~OnlineParticipationDatasetsitems.CommentItem`, from given response.
 
         :param response: scrapy response
         :return: scrapy item
@@ -100,7 +99,7 @@ class Koeln2016Spider(scrapy.Spider):
 
     def create_comment_item_list(self, response, suggestion_id, level=1):
         """
-        Create a list of CommentItems, see :class:`~OnlineParticipationDataset.items.CommentItem`, from given response.
+        Create a list of CommentItems, see :class:`~OnlineParticipationDatasetsitems.CommentItem`, from given response.
 
         :param response: scrapy response
         :return: list with CommentItems
@@ -124,7 +123,7 @@ class Koeln2016Spider(scrapy.Spider):
 
     def parse_comment_tree(self, item_list):
         """
-        Parse list with CommentItems, see :class:`~OnlineParticipationDataset.items.CommentItem`, to restore the comment tree. Write parent and children to items. Items need to have values for level, comment_id and suggestion_id.
+        Parse list with CommentItems, see :class:`~OnlineParticipationDatasetsitems.CommentItem`, to restore the comment tree. Write parent and children to items. Items need to have values for level, comment_id and suggestion_id.
 
         :param item_list: list with CommentItems
         :return list with CommentItems
@@ -153,7 +152,7 @@ class Koeln2016Spider(scrapy.Spider):
 
     def create_suggestion_item(self, response):
         """
-        Create a SuggestionItem, see :class:`~OnlineParticipationDataset.items.SuggestionItem`, from given response.
+        Create a SuggestionItem, see :class:`~OnlineParticipationDatasetsitems.SuggestionItem`, from given response.
 
         :param response: scrapy response
         :return: scrapy item
@@ -193,7 +192,7 @@ class Koeln2016Spider(scrapy.Spider):
 
     def parse_thread(self, response):
         """
-        Parse thread and yield a SuggestionItem, see :class:`~OnlineParticipationDataset.items.SuggestionItem`.
+        Parse thread and yield a SuggestionItem, see :class:`~OnlineParticipationDatasetsitems.SuggestionItem`.
 
         :param response: scrapy response
         :return: generator
