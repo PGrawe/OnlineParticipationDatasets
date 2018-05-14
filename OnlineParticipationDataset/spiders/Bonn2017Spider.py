@@ -11,11 +11,10 @@ class Bonn2017Spider(scrapy.Spider):
 
     def __init__(self, *args, **kwargs):
         super(Bonn2017Spider, self).__init__(*args, **kwargs)
-        locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8')        
+        locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8')
 
     def get_suggestion_id(self, response):
-        return int(re.search('(?:node-)(\d+)',response.xpath('.//div[@class="panel-pane-content-inside"]/article/@class')
-                             .extract_first())[1] or 0)
+        return int(response.xpath('.//article[starts-with(@class,"node-proposal")]/@data-nid').extract_first() or 0)
 
     def get_suggestion_author(self, response):
         return response.xpath('.//span[@class="username"]/text()').extract_first().strip()
@@ -24,36 +23,45 @@ class Bonn2017Spider(scrapy.Spider):
         return response.xpath('.//h2[@class="node__title node-title"]/text()').extract_first().strip()
 
     def get_suggestion_category(self, response):
-        return response.xpath(
-            './/div[@class="additional-infos"]//div[contains(@class,"field-name-field-category")]//div[@class="field-item even"]/text()').extract_first()
+        try:
+            return response.xpath(
+                './/div[@class="nmw m-auto"]/div[@class="button-small"]/text()').extract_first().strip()
+        except AttributeError:
+            return None
 
     def get_suggestion_type(self,response):
         return response.xpath(
-            './/div[@class="additional-infos"]//div[contains(@class,"field-name-field-proposal-financial-type")]//div[@class="field-item even"]/text()').extract_first()
+            './/div[contains(@class,"field-name-field-proposal-financial-type")]//div[@class="field-item even"]/text()').extract_first()
 
     def parse_content(self, lines):
         # return ''.join(map(lambda s: s.strip(), lines))
         return ''.join(lines)
 
     def get_suggestion_content(self, response):
-        return self.parse_content(response.xpath('.//div[contains(@class,"node-main-content")]//p/text()').extract())
+        return self.parse_content(response.xpath('.//div[@class="nmw m-auto"]//div[@class="field-items"]//p/text()').extract())
 
     def get_suggestion_approval(self, response):
-         return int(response.xpath('.//span[@title="Pro votes"]/text()')
-                    .extract_first() or 0)
+         return self.parse_split_int(response.xpath('.//span[@class="count-icon count-votes-up"]/text()')
+                    .extract_first())
 
-    def get_suggestion_refusal(self, response):
-        return int(response.xpath('.//span[@title="Contra votes"]/text()')
-            .extract_first() or 0)
+    # def get_suggestion_refusal(self, response):
+    #     return int(response.xpath('.//span[@title="Contra votes"]/text()')
+    #         .extract_first() or 0)
 
-    def get_suggestion_abstention(self, response):
-        return int(response.xpath('.//span[@title="Neutral votes"]/text()')
-            .extract_first() or 0)
+    # def get_suggestion_abstention(self, response):
+    #     return int(response.xpath('.//span[@title="Neutral votes"]/text()')
+    #         .extract_first() or 0)
+
+    def parse_split_int(self, s):
+        try:
+            return int(s.split()[0])
+        except (TypeError, AttributeError) as _:
+            return 0
 
     def get_suggestion_comment_count(self, response):
-        return int(response.xpath('.//span[@class="count-comments count-icon"]/text()')
-                .extract_first() or 0)
-                
+        return self.parse_split_int(response.xpath('.//span[@class="count-comments count-icon"]/text()')
+                .extract_first())
+
     def get_suggestion_parse_datetime(self, s):
         return datetime.strptime(
             re.sub(r"(\s|[a-z])+", "", s.lower(), flags=re.UNICODE), '%d.%m.%Y')
@@ -73,7 +81,7 @@ class Bonn2017Spider(scrapy.Spider):
         return self.parse_content(response.xpath('./div/div[@class="comment-body"]//p/text()').extract())
 
     def get_comment_title(self, response):
-        return response.xpath('./div/div[@class="comment-body"]/h3/a/text()').extract_first().strip()
+        return response.xpath('./div/div[@class="comment-body"]//a[@rel="bookmark"]/text()').extract_first().strip()
 
     def get_comment_author(self, response):
         return response.xpath('./div/div[@class="comment-meta"]//span/text()').extract_first().strip()
@@ -147,8 +155,8 @@ class Bonn2017Spider(scrapy.Spider):
         suggestion_item['category'] = self.get_suggestion_category(response)
         suggestion_item['author'] = self.get_suggestion_author(response)
         suggestion_item['approval'] = self.get_suggestion_approval(response)
-        suggestion_item['refusal'] = self.get_suggestion_refusal(response)
-        suggestion_item['abstention'] = self.get_suggestion_abstention(response)
+        # suggestion_item['refusal'] = self.get_suggestion_refusal(response)
+        # suggestion_item['abstention'] = self.get_suggestion_abstention(response)
         suggestion_item['content'] = self.get_suggestion_content(response)
         suggestion_item['comment_count'] = self.get_suggestion_comment_count(response)
         return suggestion_item
@@ -161,14 +169,14 @@ class Bonn2017Spider(scrapy.Spider):
         :param response: scrapy response
         :return: generator
         """
-        for thread in response.xpath('//div[@class="view-content"]//div[@class="node-inside"]'):
-            thread_url = thread.xpath('./header/h2/a/@href').extract_first()
+        for thread in response.xpath('//div[@class="view-content"]//a[@data-rel="#main-content"]'):
+            thread_url = thread.xpath('@href').extract_first()
             yield response.follow(thread_url, self.parse_thread)
 
 
         # Parse next Site
         next_page = response.xpath(
-            '//div[@class="item-list"]/ul[@class="pager"]/li[@class="pager-next"]/a/@href').extract_first()
+            './/li[starts-with(@class, "pager-next")]/a/@href').extract_first()
         if next_page:
             yield response.follow(next_page, self.parse)
 
