@@ -169,7 +169,7 @@ class Bonn2017Spider(scrapy.Spider):
         :param response: scrapy response
         :return: generator
         """
-        for thread in response.xpath('//div[@class="view-content"]//a[@data-rel="#main-content"]'):
+        for thread in response.xpath('//div[@class="view-content"]/div/div/a[@data-rel="#main-content"]'):
             thread_url = thread.xpath('@href').extract_first()
             yield response.follow(thread_url, self.parse_thread)
 
