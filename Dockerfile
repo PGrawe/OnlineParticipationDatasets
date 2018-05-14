@@ -11,7 +11,6 @@ WORKDIR /home/appuser
 
 COPY ./OnlineParticipationDatasets OnlineParticipationDatasets
 COPY ./setup.py ./scrapy.cfg ./scrapyd.conf ./docker-entrypoint.sh ./
-RUN mkdir ./downloads
 RUN chown -R appuser:appuser ./ && chmod +x docker-entrypoint.sh
 
 USER appuser

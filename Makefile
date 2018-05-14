@@ -13,4 +13,4 @@ shell:
 	--name=$(name) $(name) bash -l
 
 start: stop
-	docker run -d --restart=unless-stopped -p 6800:6800 -v $(shell pwd)/downloads:$(home)/downloads --name=$(name) $(name)
+	docker run -d --restart=unless-stopped -p 6800:6800 -v $(shell pwd)/downloads:$(home)/downloads:z --name=$(name) $(name)
