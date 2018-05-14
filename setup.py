@@ -7,4 +7,9 @@ setup(
     version='0.0.1',
     description='',
     url='https://github.com/PGrawe/OnlineParticipationDatasets',
+    include_packages_data=True,
+    install_requires=[
+        'scrapy',
+        'scrapyd'
+    ],
 )

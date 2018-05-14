@@ -1,15 +1,14 @@
-name = onlineparticipationdatasets
-registry = hub.docker.com
+name = crawler
 
 build:
-	docker build -t $(registry)/$(name) $(BUILD_OPTS) .
+	docker build -t $(name) .
 
 stop:
 	docker rm -f $(name) || true
 
-run: stop
+shell:
 	docker run -it --rm=true -v $(shell pwd):/src \
-	--name=$(name) $(registry)/$(name) bash -l
+	--name=$(name) $(name) bash -l
 
 start: stop
-	docker run -d -v $(shell pwd):/src --name=$(name) $(registry)/$(name)
+	docker run -d -v $(shell pwd):/src --name=$(name) $(name)
