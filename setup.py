@@ -4,12 +4,11 @@ from setuptools import find_packages
 
 setup(
     name='onlineparticipationdatasets',
-    version='0.0.1',
+    version='1.1',
     description='',
     url='https://github.com/PGrawe/OnlineParticipationDatasets',
-    include_packages_data=True,
     install_requires=[
         'scrapy',
-        'scrapyd'
     ],
+    packages=find_packages()
 )
