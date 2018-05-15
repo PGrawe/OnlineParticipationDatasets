@@ -49,7 +49,7 @@ class AbstractFlatWriterPipeline(ABC):
                 item_list = item_list[:i+1] + comment_children + item_list[i+1:]
             i += 1
         return [item] + item_list
-    @abstractmethod
+
     def process_item(self, item, spider):
         '''
         Exports item to json-file.
@@ -102,7 +102,7 @@ class JsonWriterPipeline(object):
         return item
 
 
-class FlatJsonWriterPipeline(object):
+class FlatJsonWriterPipeline(AbstractFlatWriterPipeline):
     '''
     Pipeline for storing scraped items in plain json
     '''
@@ -127,32 +127,5 @@ class FlatJsonWriterPipeline(object):
         self.exporter.finish_exporting()
         self.outfile.close()
 
-    def flatten(self,item):
-        """Flat a given crapy item
-
-            Creates list with suggestion and all its comments, all on one level.
-        """
-        if not 'comments' in item:
-            return [item]
-        item_list = item.pop('comments')
-        i = 0
-        # XXX List is changed while iterating it
-        while i < len(item_list):
-            # insert the children in between, right after the parent
-            if 'children' in item_list[i]:
-                comment_children = item_list[i].pop('children')
-                item_list = item_list[:i+1] + comment_children + item_list[i+1:]
-            i += 1
-        return [item] + item_list
-
-    def process_item(self, item, spider):
-        '''
-        Exports item to json-file.
-        :param item: Item to be saved
-        :param spider: Spider scraping items
-        :return: Item
-        '''
-        item_list = self.flatten(copy.deepcopy(item))
-        for obj in item_list:
-            self.exporter.export_item(obj)
-        return item
+    def export_item(self, item):
+        self.exporter.export_item(item)
