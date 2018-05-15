@@ -5,11 +5,15 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
-import os
-from datetime import datetime
 import copy
 import logging
+import os
+from abc import ABC, abstractmethod
+from datetime import datetime
+
 from scrapy.exporters import JsonItemExporter
+
+import pymongo
 
 path = "downloads"
 
@@ -18,6 +22,49 @@ class OnlineparticipationdatasetsPipeline(object):
     def process_item(self, item, spider):
         return item
 
+class AbstractFlatWriterPipeline(ABC):
+
+    @abstractmethod
+    def open_spider(self, spider):
+        pass
+
+    @abstractmethod
+    def close_spider(self, spider):
+       pass
+
+    def flatten(self, item):
+        """Flat a given crapy item
+
+            Creates list with suggestion and all its comments, all on one level.
+        """
+        if not 'comments' in item:
+            return [item]
+        item_list = item.pop('comments')
+        i = 0
+        # XXX List is changed while iterating it
+        while i < len(item_list):
+            # insert the children in between, right after the parent
+            if 'children' in item_list[i]:
+                comment_children = item_list[i].pop('children')
+                item_list = item_list[:i+1] + comment_children + item_list[i+1:]
+            i += 1
+        return [item] + item_list
+    @abstractmethod
+    def process_item(self, item, spider):
+        '''
+        Exports item to json-file.
+        :param item: Item to be saved
+        :param spider: Spider scraping items
+        :return: Item
+        '''
+        item_list = self.flatten(copy.deepcopy(item))
+        for obj in item_list:
+            self.export_item(obj)
+        return item
+    
+    @abstractmethod
+    def export_item(self, item):
+        pass
 
 class JsonWriterPipeline(object):
     '''
@@ -109,80 +156,3 @@ class FlatJsonWriterPipeline(object):
         for obj in item_list:
             self.exporter.export_item(obj)
         return item
-
-
-class TreeGenerationPipeline(object):
-    '''
-    Pipeline generating nested json output file according to discussion-tree structure coded in items
-    '''
-    def open_spider(self, spider):
-        '''
-        Initializes tree-reference
-        :param spider: Spider scraping items
-        :return: None
-        '''
-        self.data = {}
-        self.stats={spider.name:datetime.now()}
-
-    def process_item(self,item, spider):
-        '''
-        Adds all items to dict self.data and links items to their parents as children when possible (First pass of tree-generation).
-        :param item: Item to be added to dict
-        :param spider: Spider scraping items
-        :return: Item
-        '''
-        self.data[item['id']]=item
-        if item['parent'] in self.data.keys():
-            if item['parent'] != 'None' and item not in self.data[item['parent']]['children']:
-                self.data[item['parent']]['children'].append(item)
-
-    def close_spider(self, spider):
-        '''
-        Updates dict self.data in order to link all children items to their parent (Second pass of tree-generation). Exports result to json in downloads-folder(filename: items_tree_<spider_name>.json)
-        :param spider: Spider scraping items
-        :return: None
-        '''
-        for id, item in self.data.items():
-            if item['parent'] in self.data.keys():
-                if item['parent'] != 'None' and item not in self.data[item['parent']]['children']:
-                    self.data[item['parent']]['children'].append(item)
-        suggestions = [item for id, item in self.data.items() if item['parent'] == 'None']
-        self.sort_data(suggestions)
-        if not os.path.isdir(path):
-            os.makedirs(path)
-        file = open("downloads/items_tree_" + spider.name + ".json", 'wb')
-        exporter = JsonItemExporter(file, encoding='utf-8', ensure_ascii=False)
-        exporter.start_exporting()
-        for item in suggestions:
-            exporter.export_item(item)
-        exporter.finish_exporting()
-        file.close()
-        #TODO: Logging in own pipeline
-        logging.info(suggestions)
-        self.stats[spider.name]=datetime.now()-self.stats[spider.name]
-        time_string = 'Total time elapsed for scraping: '+ str(self.stats[spider.name])
-        logging.info(time_string)
-        items_string = 'Total amount of scraped items: suggestions: '+str(spider.suggestions_counter)+', comments: '+str(spider.comments_counter)
-        logging.info(items_string)
-
-    def sort_data(self, suggestions):
-        '''
-        Sorts self.data (items) by date. (In place)
-        :param suggestions: List of top level suggestion items.
-        :return: Ordered list of top level suggestion items (by date).
-        '''
-        for suggestion in suggestions:
-            if suggestion['children']:
-                self.sort_children(suggestion['children'])
-        return suggestions
-
-    def sort_children(self, children):
-        '''
-        Sorts children items by date (In place)
-        :param children: list of children items
-        :return: None
-        '''
-        children.sort(key=lambda k: k['date_time'])
-        for child in children:
-            if child['children']:
-                self.sort_children(child['children'])
