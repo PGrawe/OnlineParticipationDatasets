@@ -83,8 +83,7 @@ class MongoPipeline(AbstractFlatWriterPipeline):
     def close_spider(self, spider):
         for collection in self.db.collection_names(False):
             if collection.endswith('_'):
-                self.db.drop_collection(collection[:-1])
-                self.db[collection].rename(collection[:-1])
+                self.db[collection].rename(collection[:-1], dropTarget=True)
         self.client.close()
 
     def export_item(self, item):
