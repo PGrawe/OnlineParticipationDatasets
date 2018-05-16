@@ -93,6 +93,14 @@ ITEM_PIPELINES = {
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 # Default is 'DEBUG'
 LOG_LEVEL = 'INFO'
-MONGO_IP = 'localhost'
-MONGO_PORT = 27017
+
+from os import environ
+try:
+    MONGO_IP = environ['MONGO_IP']
+except KeyError:
+    MONGO_IP = 'localhost'
+try:
+    MONGO_PORT = int(environ['MONGO_PORT'])
+except KeyError:
+    MONGO_PORT = 27017
 MONGO_DB = 'items'

@@ -17,3 +17,9 @@ start: stop
 
 dev: stop
 	docker run -d --rm -p 6800:6800 -v $(shell pwd)/downloads:$(home)/downloads:z --name=$(name) $(name)
+
+mongo:
+	docker run --rm --name mongo -p 27017:27017 -d mongo
+
+mongo-shell:
+	docker exec -it mongo mongo
