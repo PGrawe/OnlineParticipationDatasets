@@ -83,12 +83,12 @@ class Koeln2012Spider(scrapy.Spider):
 
     def create_comment_item(self, response, suggestion_id):
         """
-        Create a CommentItem, see :class:`~OnlineParticipationDatasetsitems.CommentItem`, from given response.
+        Create a Comment, see :class:`~OnlineParticipationDatasetsitems.Comment`, from given response.
 
         :param response: scrapy response
         :return: scrapy item
         """
-        comment_item = items.CommentItem()
+        comment_item = items.Comment()
 
         comment_item['comment_id'] = self.get_comment_id(response)
         comment_item['suggestion_id'] = suggestion_id
@@ -114,10 +114,10 @@ class Koeln2012Spider(scrapy.Spider):
 
     def create_comment_item_list(self, response, suggestion_id):
         """
-        Create a list of CommentItems, see :class:`~OnlineParticipationDatasetsitems.CommentItem`, from given response.
+        Create a list of Comments, see :class:`~OnlineParticipationDatasetsitems.Comment`, from given response.
 
         :param response: scrapy response
-        :return: list with CommentItems
+        :return: list with Comments
         """
         comment_items = []
 
@@ -130,12 +130,12 @@ class Koeln2012Spider(scrapy.Spider):
 
     def create_suggestion_item(self, response):
         """
-        Create a SuggestionItem, see :class:`~OnlineParticipationDatasetsitems.SuggestionItem`, from given response.
+        Create a Suggestion, see :class:`~OnlineParticipationDatasetsitems.Suggestion`, from given response.
 
         :param response: scrapy response
         :return: scrapy item
         """
-        suggestion_item = items.SuggestionItem()
+        suggestion_item = items.Suggestion()
         suggestion_item['suggestion_id'] = self.get_suggestion_id(response)
         suggestion_item['title'] = self.get_suggestion_title(response)
         suggestion_item['suggestion_type'] = self.get_suggestion_type(response)
@@ -170,7 +170,7 @@ class Koeln2012Spider(scrapy.Spider):
 
     def parse_thread(self, response):
         """
-        Parse thread and yield a SuggestionItem, see :class:`~OnlineParticipationDatasetsitems.SuggestionItem`.
+        Parse thread and yield a Suggestion, see :class:`~OnlineParticipationDatasetsitems.Suggestion`.
 
         :param response: scrapy response
         :return: generator
