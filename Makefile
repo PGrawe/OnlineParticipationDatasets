@@ -14,3 +14,6 @@ shell:
 
 start: stop
 	docker run -d --restart=unless-stopped -p 6800:6800 -v $(shell pwd)/downloads:$(home)/downloads:z --name=$(name) $(name)
+
+dev: stop
+	docker run -d --rm -p 6800:6800 -v $(shell pwd)/downloads:$(home)/downloads:z --name=$(name) $(name)

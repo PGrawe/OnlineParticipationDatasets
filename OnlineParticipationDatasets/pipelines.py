@@ -59,12 +59,38 @@ class AbstractFlatWriterPipeline(ABC):
         '''
         item_list = self.flatten(copy.deepcopy(item))
         for obj in item_list:
-            self.export_item(obj)
+            self.export_item(obj, spider)
         return item
     
     @abstractmethod
-    def export_item(self, item):
+    def export_item(self, item, spider):
         pass
+
+class MongoPipeline(AbstractFlatWriterPipeline):
+
+    def __init__(self, mongo_ip, mongo_port, mongo_db):
+        self.mongo_ip = mongo_ip
+        self.mongo_db = mongo_db
+        self.mongo_port = mongo_port
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(
+            mongo_ip = crawler.settings.get('MONGO_IP'),
+            mongo_port = crawler.settings.get('MONGO_PORT'),
+            mongo_db = crawler.settings.get('MONGO_DATABASE', 'items')
+        )
+
+    def open_spider(self, spider):
+        self.client = pymongo.MongoClient(self.mongo_ip, self.mongo_port)
+        self.db = self.client[self.mongo_db]
+
+    def close_spider(self, spider):
+        self.client.close()
+
+    def export_item(self, item, spider):
+        self.db[spider.name].insert_one(dict(item))
+        return item
 
 class JsonWriterPipeline(object):
     '''
@@ -127,5 +153,5 @@ class FlatJsonWriterPipeline(AbstractFlatWriterPipeline):
         self.exporter.finish_exporting()
         self.outfile.close()
 
-    def export_item(self, item):
+    def export_item(self, item, spider):
         self.exporter.export_item(item)

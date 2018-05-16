@@ -66,8 +66,9 @@ DOWNLOAD_DELAY = 0
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    # 'OnlineParticipationDatasets.pipelines.OnlineparticipationdatasetsPipeline': 300,
-   'OnlineParticipationDatasets.pipelines.JsonWriterPipeline': 300,
-   'OnlineParticipationDatasets.pipelines.FlatJsonWriterPipeline': 400,
+#    'OnlineParticipationDatasets.pipelines.JsonWriterPipeline': 300,
+#    'OnlineParticipationDatasets.pipelines.FlatJsonWriterPipeline': 400,
+    'OnlineParticipationDatasets.pipelines.MongoPipeline': 350
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -92,3 +93,6 @@ ITEM_PIPELINES = {
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 # Default is 'DEBUG'
 LOG_LEVEL = 'INFO'
+MONGO_IP = 'localhost'
+MONGO_PORT = 27017
+MONGO_DB = 'items'
