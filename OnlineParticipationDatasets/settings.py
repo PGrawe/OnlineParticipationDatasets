@@ -9,6 +9,9 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
+from os import environ
+
+
 BOT_NAME = 'OnlineParticipationDatasets'
 
 SPIDER_MODULES = ['OnlineParticipationDatasets.spiders']
@@ -94,13 +97,6 @@ ITEM_PIPELINES = {
 # Default is 'DEBUG'
 LOG_LEVEL = 'INFO'
 
-from os import environ
-try:
-    MONGO_IP = environ['MONGO_IP']
-except KeyError:
-    MONGO_IP = 'localhost'
-try:
-    MONGO_PORT = int(environ['MONGO_PORT'])
-except KeyError:
-    MONGO_PORT = 27017
-MONGO_DB = 'items'
+MONGO_IP = environ.get('MONGO_IP', default='localhost')
+MONGO_PORT = int(environ.get('MONGO_PORT', default=27017))
+
