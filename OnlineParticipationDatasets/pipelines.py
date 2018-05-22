@@ -64,20 +64,20 @@ class AbstractFlatWriterPipeline(ABC):
 
 class MongoPipeline(AbstractFlatWriterPipeline):
 
-    def __init__(self, mongo_ip, mongo_port):
-        self.mongo_ip = mongo_ip
+    def __init__(self, mongo_host, mongo_port):
+        self.mongo_host = mongo_host
         self.mongo_port = mongo_port
         # self.collections = ['items','suggestions']
 
     @classmethod
     def from_crawler(cls, crawler):
         return cls(
-            mongo_ip = crawler.settings.get('MONGO_IP'),
+            mongo_host = crawler.settings.get('MONGO_HOST'),
             mongo_port = crawler.settings.get('MONGO_PORT'),
         )
 
     def open_spider(self, spider):
-        self.client = pymongo.MongoClient(self.mongo_ip, self.mongo_port)
+        self.client = pymongo.MongoClient(self.mongo_host, self.mongo_port)
         self.db = self.client[spider.name]
 
     def close_spider(self, spider):
