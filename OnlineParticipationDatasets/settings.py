@@ -97,6 +97,6 @@ ITEM_PIPELINES = {
 # Default is 'DEBUG'
 LOG_LEVEL = 'INFO'
 
-MONGO_HOST = environ.get('MONGO_HOST', default='localhost')
-MONGO_PORT = int(environ.get('MONGO_PORT', default=27017))
+MONGO_HOST = environ.get('CONTENT_HOST', default='localhost')
+MONGO_PORT = int(environ.get('CONTENT_PORT', default=27017))
 
