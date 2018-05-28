@@ -17,3 +17,6 @@ start: stop
 
 dev: stop
 	docker run -d --rm -p 6800:6800 -v $(shell pwd)/downloads:$(HOME)/downloads:z --name=$(CRAWLER_NAME) $(CRAWLER_NAME)
+
+pump: 
+	docker run -it --rm --name=$(CRAWLER_NAME) $(CRAWLER_NAME) pump

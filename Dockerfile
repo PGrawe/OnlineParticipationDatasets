@@ -10,8 +10,10 @@ RUN useradd --create-home --shell /bin/bash appuser
 WORKDIR /home/appuser
 
 COPY ./OnlineParticipationDatasets OnlineParticipationDatasets
-COPY ./requirements.txt ./scrapy.cfg ./setup.py ./scrapyd.conf ./docker-entrypoint.sh ./
-RUN chown -R appuser:appuser ./ && chmod +x docker-entrypoint.sh
+COPY ./requirements.txt ./scrapy.cfg ./setup.py ./scrapyd.conf \
+    ./docker-entrypoint.sh ./test.py ./
+RUN chown -R appuser:appuser ./ && \
+    chmod +x docker-entrypoint.sh
 
 USER appuser
 RUN python -m venv venv
