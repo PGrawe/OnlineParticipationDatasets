@@ -6,9 +6,8 @@ from twisted.internet import reactor
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.log import configure_logging
 
-# # from apscheduler.schedulers.background import BackgroundScheduler
-# from apscheduler.schedulers.blocking import BlockingScheduler
 
+# regex patterns as keys -> factor as value
 time_s_to_key = {
     'us': 'microseconds',
     'ms': 'milliseconds',
@@ -30,17 +29,12 @@ def call_scrapy(spider, seconds):
     return d
 
 def callLater_wrapper(result, *args, **kwargs):
+    # here add returned value to thread-safe obj
     return reactor.callLater(*args,*kwargs)
-
-def on_startup(delta=None):
-    if not delta:
-        delta = {'milliseconds': 200}
-    return datetime.now() + timedelta(**delta)
 
 def parse_timestr(s):
     time_count, time_s = s.split()
     return {time_s_to_key[time_s]: int(time_count)}
-
 
 def get_envs():
     return_dict = {}
@@ -54,8 +48,9 @@ def main():
     # scheduler.add_job(call_scrapy, 'interval', kwargs={'spider': 'bonn2017'}, seconds=60, start_date=on_startup(), id='crawler')
     # scheduler.start() # for backgroundscheduler
     print('Press Ctrl+{0} to exit -- {1}'.format('Break' if os.name == 'nt' else 'C', datetime.now()))
-    call_scrapy('bonn2017', 30)
+    call_scrapy('bonn2017', 120)
     reactor.run()
+
     # try:
     #     # This is here to simulate application activity (which keeps the main thread alive).
     #     # while True:
