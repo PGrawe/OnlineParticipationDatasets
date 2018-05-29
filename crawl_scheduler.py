@@ -21,16 +21,12 @@ time_s_to_key = {
 def call_scrapy(spider, seconds):
     runner = CrawlerRunner(get_project_settings())
     d = runner.crawl(spider)
-    d.addCallback(callLater_wrapper, seconds, call_scrapy, spider, seconds)
-    # d.addBoth(lambda _: reactor.stop())
-    # # print('Run spider {} at {}'.format(spider, datetime.now()))
-    # reactor.run(installSignalHandlers=0) # the script will block here until the crawling is finished
-    # # print('{} finished at {}'.format(spider, datetime.now()))
+    d.addCallback(callLater_wrapper, seconds, call_scrapy, spider)
     return d
 
 def callLater_wrapper(result, *args, **kwargs):
     # here add returned value to thread-safe obj
-    return reactor.callLater(*args,*kwargs)
+    return reactor.callLater(*args,**kwargs)
 
 def parse_timestr(s):
     time_count, time_s = s.split()
@@ -43,7 +39,7 @@ def get_envs():
     return return_dict
 
 def main():
-    configure_logging({'LOG_FORMAT': '%(levelname)s: %(message)s'})
+    # configure_logging({'LOG_FORMAT': '%(levelname)s: %(message)s'})
     # scheduler = BlockingScheduler()
     # scheduler.add_job(call_scrapy, 'interval', kwargs={'spider': 'bonn2017'}, seconds=60, start_date=on_startup(), id='crawler')
     # scheduler.start() # for backgroundscheduler
