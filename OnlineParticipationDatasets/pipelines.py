@@ -12,6 +12,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 
 from scrapy.exporters import JsonItemExporter
+from scrapy.statscollectors import MemoryStatsCollector
 
 import pymongo
 
@@ -64,9 +65,10 @@ class AbstractFlatWriterPipeline(ABC):
 
 class MongoPipeline(AbstractFlatWriterPipeline):
 
-    def __init__(self, mongo_host, mongo_port):
+    def __init__(self, mongo_host, mongo_port, stats=None):
         self.mongo_host = mongo_host
         self.mongo_port = mongo_port
+        self.stats = stats
         # self.collections = ['items','suggestions']
 
     @classmethod
@@ -74,6 +76,7 @@ class MongoPipeline(AbstractFlatWriterPipeline):
         return cls(
             mongo_host = crawler.settings.get('MONGO_HOST'),
             mongo_port = crawler.settings.get('MONGO_PORT'),
+            stats = crawler.stats
         )
 
     def open_spider(self, spider):
@@ -81,13 +84,20 @@ class MongoPipeline(AbstractFlatWriterPipeline):
         self.db = self.client[spider.name]
 
     def close_spider(self, spider):
+        if self.stats:
+            self.db['crawling_stats'].insert_one(self.stats.get_stats())
         for collection in self.db.collection_names(False):
             if collection.endswith('_'):
                 self.db[collection].rename(collection[:-1], dropTarget=True)
         self.client.close()
 
     def export_item(self, item):
-        self.db[type(item).__name__.lower() + 's_'].insert_one(dict(item))
+        export_dict = dict(item)
+        # if type(item).__name__ == 'Comment':
+        #     export_dict['_id'] = export_dict.pop('comment_id')
+        # else:
+        #     export_dict['_id'] = export_dict.pop('suggestion_id')            
+        self.db[type(item).__name__.lower() + 's_'].insert_one(export_dict)
         return item
 
 class JsonWriterPipeline(object):
