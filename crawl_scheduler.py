@@ -1,61 +1,84 @@
 from datetime import datetime, timedelta
 import time
 import os
+import re
 from scrapy.utils.project import get_project_settings
 from twisted.internet import reactor
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.log import configure_logging
 
+SECS_PER_MINUTE = 60
+SECS_PER_HOUR = SECS_PER_MINUTE * 60
+SECS_PER_DAY = SECS_PER_HOUR * 24
 
-# regex patterns as keys -> factor as value
-time_s_to_key = {
-    'us': 'microseconds',
-    'ms': 'milliseconds',
-    's': 'seconds',
-    'm': 'minutes',
-    'h': 'hours',
-    'd': 'days'
-}
+
+MULTIPLIERS = {
+    'days': SECS_PER_DAY,
+    'day': SECS_PER_DAY,
+    'd': SECS_PER_DAY,
+    'hours': SECS_PER_HOUR,
+    'hour': SECS_PER_HOUR,
+    'hr': SECS_PER_HOUR,
+    'h': SECS_PER_HOUR,
+    'minutes': SECS_PER_MINUTE,
+    'minute': SECS_PER_MINUTE,
+    'min': SECS_PER_MINUTE,
+    'm': SECS_PER_MINUTE,
+    'seconds': 1,
+    'second': 1,
+    'sec': 1,
+    's': 1
+    }
 
 
 def call_scrapy(spider, seconds):
-    runner = CrawlerRunner(get_project_settings())
-    d = runner.crawl(spider)
-    d.addCallback(callLater_wrapper, seconds, call_scrapy, spider)
-    return d
+    settings = get_settings_with_logfile()
+    runner = CrawlerRunner(settings)
+    deferred = runner.crawl(spider)
+    # deferred.addCallback(scrapy_callback, seconds, call_scrapy, spider)
+    deferred.addBoth(lambda _: reactor.stop())
+    return deferred
+
+def scrapy_callback(result, seconds, func, spider):
+    # return reactor.callLater(seconds, func, spider, seconds)
+    pass
 
 def callLater_wrapper(result, *args, **kwargs):
     # here add returned value to thread-safe obj
     return reactor.callLater(*args,**kwargs)
 
-def parse_timestr(s):
-    time_count, time_s = s.split()
-    return {time_s_to_key[time_s]: int(time_count)}
+def extract_multiplier(s):
 
-def get_envs():
-    return_dict = {}
-    return_dict['onstartup'] = parse_timestr(os.environ.get('ONSTARTUP'))
-    return_dict['spider'] = os.environ.get('SPIDER')
-    return return_dict
+    global MULTIPLIERS
+
+    for suffix, multiplier in MULTIPLIERS.items():
+        if s == suffix:
+            return multiplier
+
+def parse_timestr(s):
+    # strings are immutable
+    pattern = r'[a-z]+|[^a-z\s]+'
+    groups = re.findall(pattern, s)
+    seconds = 0
+    for i in range(0,len(groups),2):
+        seconds += float(groups[i]) * extract_multiplier(groups[i+1])
+    return seconds
+
+def get_settings_with_logfile():
+    settings = get_project_settings()
+    log_path = os.environ['LOG_ROOT']
+    current_day = datetime.date(datetime.now())
+    settings.set('LOG_FILE', get_logfile_name(log_path, current_day))
+    configure_logging({'LOG_ENABLED': False})
+    return settings
+
+def get_logfile_name(log_path, current_day):
+    return os.path.abspath(os.path.normpath(log_path + '/crawler_log-{}.log'.format(str(current_day))))
 
 def main():
-    # configure_logging({'LOG_FORMAT': '%(levelname)s: %(message)s'})
-    # scheduler = BlockingScheduler()
-    # scheduler.add_job(call_scrapy, 'interval', kwargs={'spider': 'bonn2017'}, seconds=60, start_date=on_startup(), id='crawler')
-    # scheduler.start() # for backgroundscheduler
-    print('Press Ctrl+{0} to exit -- {1}'.format('Break' if os.name == 'nt' else 'C', datetime.now()))
-    call_scrapy('bonn2017', 120)
+    call_scrapy(os.environ['SPIDER'], 90)
     reactor.run()
-
-    # try:
-    #     # This is here to simulate application activity (which keeps the main thread alive).
-    #     # while True:
-    #     #     time.sleep(10)
-    #     scheduler.start()
-    # except (KeyboardInterrupt, SystemExit):
-    #     # Not strictly necessary if daemonic mode is enabled but should be done if possible
-    #     scheduler.shutdown()
 
 if __name__ == '__main__':
     main()
-    
+
