@@ -54,6 +54,7 @@ def extract_multiplier(s):
     for suffix, multiplier in MULTIPLIERS.items():
         if s == suffix:
             return multiplier
+    raise NotImplementedError('Only days, hours, minutes and seconds are supported')
 
 def parse_timestr(s):
     # strings are immutable
