@@ -35,13 +35,12 @@ def call_scrapy(spider, seconds):
     settings = get_settings_with_logfile()
     runner = CrawlerRunner(settings)
     deferred = runner.crawl(spider)
-    # deferred.addCallback(scrapy_callback, seconds, call_scrapy, spider)
-    deferred.addBoth(lambda _: reactor.stop())
+    deferred.addCallback(scrapy_callback, seconds, call_scrapy, spider)
+    # deferred.addBoth(lambda _: reactor.stop())
     return deferred
 
 def scrapy_callback(result, seconds, func, spider):
-    # return reactor.callLater(seconds, func, spider, seconds)
-    pass
+    return reactor.callLater(seconds, func, spider, seconds)
 
 def callLater_wrapper(result, *args, **kwargs):
     # here add returned value to thread-safe obj
@@ -67,7 +66,7 @@ def parse_timestr(s):
 
 def get_settings_with_logfile():
     settings = get_project_settings()
-    log_path = os.environ['LOG_ROOT']
+    log_path = os.environ.get('LOG_ROOT', './log')
     current_day = datetime.date(datetime.now())
     settings.set('LOG_FILE', get_logfile_name(log_path, current_day))
     configure_logging({'LOG_ENABLED': False})
@@ -77,7 +76,7 @@ def get_logfile_name(log_path, current_day):
     return os.path.abspath(os.path.normpath(log_path + '/crawler_log-{}.log'.format(str(current_day))))
 
 def main():
-    call_scrapy(os.environ['SPIDER'], 90)
+    call_scrapy(os.environ['SPIDER'], parse_timestr(os.environ['RUNEVERY']))
     reactor.run()
 
 if __name__ == '__main__':
