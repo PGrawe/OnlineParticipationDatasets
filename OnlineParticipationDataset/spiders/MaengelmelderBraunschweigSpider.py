@@ -1,20 +1,19 @@
+import locale
+from datetime import datetime
 from typing import Generator
 
 import scrapy
-from scrapy import Selector
 from scrapy.http import HtmlResponse
 
 from OnlineParticipationDataset import items
-from datetime import datetime
-import re
-import locale
-
 from OnlineParticipationDataset.items import SuggestionItem
 
 
 class MaengelmelderBraunschweigSpider(scrapy.Spider):
     name = "maengelmelder-braunschweig"
-    start_urls = ['https://www.mitreden.braunschweig.de/node/1358']
+    start_id = 1358
+    start_urls = ["https://www.mitreden.braunschweig.de/node/%d" % start_id]
+    handle_httpstatus_list = [403, 404]
 
     def __init__(self, *args, **kwargs):
         super(MaengelmelderBraunschweigSpider, self).__init__(*args, **kwargs)
@@ -24,31 +23,35 @@ class MaengelmelderBraunschweigSpider(scrapy.Spider):
         """
         Parse given response and yield items for post in Maengelmelder Braunschweig.
         """
-        for post in response.css("article.with-categories"):
-            yield MaengelmelderBraunschweigSpider.parse_post(post)
-
-        next_page = response.css("a[title='Zur nächsten Seite']::attr('href')").extract_first()
-        if next_page:
-            yield response.follow(next_page, self.parse)
+        next_page = response.css("article.with-categories h3 a::attr('href')").extract_first()
+        yield response.follow(next_page, MaengelmelderBraunschweigSpider.parse_posts)
 
     @staticmethod
-    def parse_post(article: Selector) -> SuggestionItem:
+    def parse_posts(response: HtmlResponse) -> Generator:
+        """
+        Parses this post if it belongs to Maengelmelder, and then continues with the previous post until the start url
+        is reached.
+        """
+        if "Mängelmelder" == response.css(".user-date-and-time-icons .icons .fa-comment::text").extract_first():
+            yield MaengelmelderBraunschweigSpider.parse_post(response)
+
+        base_url, current_id = response.url.rsplit("/", 1)
+        next_id = int(current_id) - 1
+        if next_id > MaengelmelderBraunschweigSpider.start_id:
+            next_page = "%s/%d" % (base_url, next_id)
+            yield response.follow(next_page, MaengelmelderBraunschweigSpider.parse_posts)
+
+    @staticmethod
+    def parse_post(response: HtmlResponse) -> SuggestionItem:
         """
         Parse thread and yield a SuggestionItem, see :class:`~OnlineParticipationDataset.items.SuggestionItem`.
-
-        :param response: scrapy response
-        :return: generator
         """
-        # suggestion = self.create_suggestion_item(response)
-        # suggestion['comments'] = self.create_comment_item_list(response, suggestion['suggestion_id'])
         suggestion_item = items.SuggestionItem()
-        suggestion_item['suggestion_id'] = article.css("h3 a::attr('href')").extract_first().replace("/node/", "") # TODO page entfernen
-        suggestion_item['title'] = article.css("h3 a::text").extract_first()
-        suggestion_item['date_time'] = datetime.strptime(article.css("p.user-and-date:first-child::text").extract()[1].strip(), "am %d.%m.%Y")
-        suggestion_item['category'] = article.css(".category_button span::text").extract_first().strip()
-        suggestion_item['author'] = article.css("span.username::text").extract_first()
-        # suggestion_item['approval'] = self.get_suggestion_approval(response)
-        suggestion_item['address'] = article.css("p.user-and-date::text")[-1].extract().strip()
-        suggestion_item['content'] = article.css(".field p::text").extract_first()
-        # suggestion_item['comment_count'] = self.get_suggestion_comment_count(response)
+        suggestion_item['suggestion_id'] = response.url.split("/")[-1]
+        suggestion_item['title'] = response.css("h2.node-title::text").extract_first()
+        suggestion_item['date_time'] = datetime.strptime(response.css("p.user-and-date:first-child::text").extract()[1].strip(), "am %d.%m.%Y")
+        suggestion_item['category'] = response.css(".category_button span::text").extract_first().strip()
+        suggestion_item['author'] = response.css("span.username::text").extract_first()
+        suggestion_item['address'] = response.css("p.user-and-date::text")[-1].extract().strip()
+        suggestion_item['content'] = response.css(".field p::text").extract_first()
         return suggestion_item

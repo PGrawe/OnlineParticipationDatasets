@@ -32,6 +32,7 @@ scrapy crawl <dataset>
 | Köln 2013 | [buergerhaushalt.stadt-koeln.de/2013/buergervorschlaege](https://buergerhaushalt.stadt-koeln.de/2013/buergervorschlaege?&sort_bef_combine=php+ASC) | 592 | 3095 | 3687 | 5 minutes | scrapy crawl koeln2013|
 | Köln 2015 | [buergerhaushalt.stadt-koeln.de/2015/buergervorschlaege](https://buergerhaushalt.stadt-koeln.de/2015/buergervorschlaege?&sort_bef_combine=php+ASC) | 631 | 1855 | 2486 | 10 minutes | scrapy crawl koeln2015|
 | Köln 2016 | [buergerhaushalt.stadt-koeln.de/2016/buergervorschlaege](https://buergerhaushalt.stadt-koeln.de/2016/buergervorschlaege?&sort_bef_combine=php+ASC) | 827 | 1314 | 2141 | 9 minutes | scrapy crawl koeln2016|
+| Mängelmelder Braunschweig | [mitreden.braunschweig.de/node/1358](https://www.mitreden.braunschweig.de/node/1358) | ≥ 3220 | | | 34 minutes | scrapy crawl maengelmelder-braunschweig|
 | Raddialog Bonn | [raddialog.bonn.de/dialoge](https://www.raddialog.bonn.de/dialoge/bonner-rad-dialog?sort_bef_combine=created%20ASC) | 2331 | 2425 | 4756 | 16 minutes | scrapy crawl raddialog-bonn|
 | Raddialog Koeln | [raddialog-ehrenfeld.koeln.de/dialoge](http://www.raddialog-ehrenfeld.koeln/dialoge/ehrenfelder-raddialog?sort_bef_combine=created%20ASC) | 378 | 277 | 655 | 2 minutes | scrapy crawl raddialog-koeln|
 | Raddialog Moers | [raddialog.moers.de/dialoge](https://www.raddialog.moers.de/node/1384?sort_bef_combine=created%20ASC) | 463 | 300 | 763 | 3 minutes | scrapy crawl raddialog-moers|
