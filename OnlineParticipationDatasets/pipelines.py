@@ -58,7 +58,7 @@ class AbstractFlatWriterPipeline(ABC):
         for obj in item_list:
             self.export_item(obj)
         return item
-    
+
     @abstractmethod
     def export_item(self, item):
         pass
@@ -93,7 +93,7 @@ class MongoPipeline(AbstractFlatWriterPipeline):
 
     def export_item(self, item):
         # export_dict = dict(item)
-        # export_dict['_id'] = export_dict.pop(type(item).__name__+'_id')   
+        # export_dict['_id'] = export_dict.pop(type(item).__name__+'_id')
         self.db[type(item).__name__.lower() + 's_'].insert_one(dict(item))
         return item
 
