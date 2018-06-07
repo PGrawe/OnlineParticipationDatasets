@@ -6,13 +6,10 @@
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 import copy
-import logging
 import os
 from abc import ABC, abstractmethod
-from datetime import datetime
 
 from scrapy.exporters import JsonItemExporter
-from scrapy.statscollectors import MemoryStatsCollector
 
 import pymongo
 
@@ -27,14 +24,14 @@ class AbstractFlatWriterPipeline(ABC):
 
     @abstractmethod
     def close_spider(self, spider):
-       pass
+        pass
 
     def flatten(self, item):
         """Flat a given crapy item
 
-            Creates list with suggestion and all its comments, all on one level.
+           Creates list with suggestion and all its comments, all on one level.
         """
-        if not 'comments' in item:
+        if 'comments' not in item:
             return [item]
         item_list = item.pop('comments')
         i = 0
@@ -63,6 +60,7 @@ class AbstractFlatWriterPipeline(ABC):
     def export_item(self, item):
         pass
 
+
 class MongoPipeline(AbstractFlatWriterPipeline):
 
     def __init__(self, mongo_host, mongo_port, stats=None):
@@ -74,9 +72,9 @@ class MongoPipeline(AbstractFlatWriterPipeline):
     @classmethod
     def from_crawler(cls, crawler):
         return cls(
-            mongo_host = crawler.settings.get('MONGO_HOST'),
-            mongo_port = crawler.settings.get('MONGO_PORT'),
-            stats = crawler.stats
+            mongo_host=crawler.settings.get('MONGO_HOST'),
+            mongo_port=crawler.settings.get('MONGO_PORT'),
+            stats=crawler.stats
         )
 
     def open_spider(self, spider):
@@ -97,20 +95,25 @@ class MongoPipeline(AbstractFlatWriterPipeline):
         self.db[type(item).__name__.lower() + 's_'].insert_one(dict(item))
         return item
 
+
 class JsonWriterPipeline(object):
     '''
     Pipeline for storing scraped items in plain json
     '''
     def open_spider(self, spider):
         '''
-        Creates json-file in downloads folder on spider starting. Output file is named: items_<spider_name>.json
+        Creates json-file in downloads folder on spider starting.
+        Output file is named: items_<spider_name>.json
         :param spider: Spider scraping items
         :return: None
         '''
         if not os.path.isdir(path):
             os.makedirs(path)
         self.outfile = open("downloads/items_"+spider.name+".json", 'wb')
-        self.exporter = JsonItemExporter(self.outfile, encoding='utf-8', ensure_ascii=False, indent=2)
+        self.exporter = JsonItemExporter(self.outfile,
+                                         encoding='utf-8',
+                                         ensure_ascii=False,
+                                         indent=2)
         self.exporter.start_exporting()
 
     def close_spider(self, spider):
@@ -139,14 +142,18 @@ class FlatJsonWriterPipeline(AbstractFlatWriterPipeline):
     '''
     def open_spider(self, spider):
         '''
-        Creates json-file in downloads folder on spider starting. Output file is named: items_<spider_name>_flat.json
+        Creates json-file in downloads folder on spider starting.
+        Output file is named: items_<spider_name>_flat.json
         :param spider: Spider scraping items
         :return: None
         '''
         if not os.path.isdir(path):
             os.makedirs(path)
         self.outfile = open("downloads/items_"+spider.name+"_flat.json", 'wb')
-        self.exporter = JsonItemExporter(self.outfile, encoding='utf-8', ensure_ascii=False, indent=2)
+        self.exporter = JsonItemExporter(self.outfile,
+                                         encoding='utf-8',
+                                         ensure_ascii=False,
+                                         indent=2)
         self.exporter.start_exporting()
 
     def close_spider(self, spider):
