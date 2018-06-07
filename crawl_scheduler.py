@@ -1,5 +1,4 @@
-from datetime import datetime, timedelta
-import time
+from datetime import datetime
 import os
 import re
 from scrapy.utils.project import get_project_settings
@@ -39,12 +38,15 @@ def call_scrapy(spider, seconds):
     # deferred.addBoth(lambda _: reactor.stop())
     return deferred
 
+
 def scrapy_callback(result, seconds, func, spider):
     return reactor.callLater(seconds, func, spider, seconds)
 
+
 def callLater_wrapper(result, *args, **kwargs):
     # here add returned value to thread-safe obj
-    return reactor.callLater(*args,**kwargs)
+    return reactor.callLater(*args, **kwargs)
+
 
 def extract_multiplier(s):
 
@@ -55,14 +57,16 @@ def extract_multiplier(s):
             return multiplier
     raise NotImplementedError('Only days, hours, minutes and seconds are supported')
 
+
 def parse_timestr(s):
     # strings are immutable
     pattern = r'[a-z]+|[^a-z\s]+'
     groups = re.findall(pattern, s)
     seconds = 0
-    for i in range(0,len(groups),2):
+    for i in range(0, len(groups), 2):
         seconds += float(groups[i]) * extract_multiplier(groups[i+1])
     return seconds
+
 
 def get_settings_with_logfile():
     settings = get_project_settings()
@@ -72,13 +76,17 @@ def get_settings_with_logfile():
     configure_logging({'LOG_ENABLED': False})
     return settings
 
+
 def get_logfile_name(log_path, current_day):
-    return os.path.abspath(os.path.normpath(log_path + '/crawler_log-{}.log'.format(str(current_day))))
+    return os.path.abspath(
+            os.path.normpath(
+                log_path + '/crawler_log-{}.log'.format(str(current_day))))
+
 
 def main():
     call_scrapy(os.environ['SPIDER'], parse_timestr(os.environ['RUNEVERY']))
     reactor.run()
 
+
 if __name__ == '__main__':
     main()
-
