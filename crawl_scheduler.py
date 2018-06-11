@@ -34,8 +34,10 @@ def call_scrapy(spider, seconds):
     settings = get_settings_with_logfile()
     runner = CrawlerRunner(settings)
     deferred = runner.crawl(spider)
-    deferred.addCallback(scrapy_callback, seconds, call_scrapy, spider)
-    # deferred.addBoth(lambda _: reactor.stop())
+    if seconds:
+        deferred.addCallback(scrapy_callback, seconds, call_scrapy, spider)
+    else:
+        deferred.addBoth(lambda _: reactor.stop())
     return deferred
 
 
@@ -58,8 +60,10 @@ def extract_multiplier(s):
     raise NotImplementedError('Only days, hours, minutes and seconds are supported')
 
 
-def parse_timestr(s):
+def parse_timestr(s=None):
     # strings are immutable
+    if not s:
+        return None
     pattern = r'[a-z]+|[^a-z\s]+'
     groups = re.findall(pattern, s)
     seconds = 0
@@ -84,7 +88,7 @@ def get_logfile_name(log_path, current_day):
 
 
 def main():
-    call_scrapy(os.environ['SPIDER'], parse_timestr(os.environ['RUNEVERY']))
+    call_scrapy(os.environ['SPIDER'], parse_timestr(os.environ.get('RUNEVERY', None))
     reactor.run()
 
 
