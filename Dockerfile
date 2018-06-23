@@ -12,7 +12,7 @@ WORKDIR /home/appuser
 COPY ./OnlineParticipationDatasets OnlineParticipationDatasets
 COPY ./requirements.txt ./scrapy.cfg ./setup.py ./scrapyd.conf \
     ./docker-entrypoint.sh crawl_scheduler.py ./
-RUN mkdir log
+RUN mkdir logs
 RUN chown -R appuser:appuser ./ && \
     chmod +x docker-entrypoint.sh
 

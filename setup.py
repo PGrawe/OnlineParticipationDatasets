@@ -9,7 +9,8 @@ setup(
     url='https://github.com/PGrawe/OnlineParticipationDatasets',
     install_requires=[
         'scrapy',
-        'scrapyd'
+        'scrapyd',
+        'pymongo'
     ],
     packages=find_packages()
 )

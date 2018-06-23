@@ -74,7 +74,7 @@ def parse_timestr(s=None):
 
 def get_settings_with_logfile():
     settings = get_project_settings()
-    log_path = os.environ.get('LOG_ROOT', './log')
+    log_path = os.environ.get('LOG_ROOT', './logs')
     current_day = datetime.date(datetime.now())
     settings.set('LOG_FILE', get_logfile_name(log_path, current_day))
     configure_logging({'LOG_ENABLED': False})
