@@ -8,10 +8,12 @@
 import copy
 import os
 from abc import ABC, abstractmethod
+import urllib.parse as up
 
 from scrapy.exporters import JsonItemExporter
 
 import pymongo
+# import sqlalchemy
 
 path = "downloads"
 
@@ -60,6 +62,25 @@ class AbstractFlatWriterPipeline(ABC):
     def export_item(self, item):
         pass
 
+# class SQLPipeline(AbstractFlatWriterPipeline):
+
+#     def __init__(self, db_url, stats=None):
+#         self.db_url = db_url
+#         self.stats = stats
+
+#     @classmethod
+#     def from_crawler(cls, crawler):
+#         return cls(
+#             db_url=crawler.settings.get('DB_URL', 'postgres://localhost:5432'),
+#             stats=crawler.stats
+#         )
+
+#     def open_spider(self, spider):
+#         parsed_url = up.urlparse(self.db_url)
+#         if parsed_url.scheme != 'sqlite':
+#             parsed_url = parsed_url._replace(path=f'/{spider.name}')
+#             self.db_url = up.urlunparse(parsed_url)
+#         self.engine = sqlalchemy.create_engine(self.db_url)
 
 class MongoPipeline(AbstractFlatWriterPipeline):
 
@@ -82,17 +103,18 @@ class MongoPipeline(AbstractFlatWriterPipeline):
         self.db = self.client[spider.name]
 
     def close_spider(self, spider):
-        if self.stats:
+        if self.stats is not None:
             self.db['crawling_stats'].insert_one(self.stats.get_stats())
-        for collection in self.db.collection_names(False):
-            if collection.endswith('_'):
-                self.db[collection].rename(collection[:-1], dropTarget=True)
+        # for collection in self.db.collection_names(False):
+        #     if collection.endswith('_'):
+        #         self.db[collection].rename(collection[:-1], dropTarget=True)
         self.client.close()
 
     def export_item(self, item):
-        # export_dict = dict(item)
-        # export_dict['_id'] = export_dict.pop(type(item).__name__+'_id')
-        self.db[type(item).__name__.lower() + 's_'].insert_one(dict(item))
+        export_dict = dict(item)
+        export_dict['_id'] = export_dict.pop(type(item).__name__.lower()+'_id')
+        # self.db[type(item).__name__.lower() + 's_'].insert_one(export_dict)
+        self.db[type(item).__name__.lower() + 's'].replace_one({'_id': export_dict['_id']},export_dict, upsert=True)
         return item
 
 
