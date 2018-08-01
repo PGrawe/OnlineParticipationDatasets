@@ -9,7 +9,7 @@ done
 
 if [ "$1" == "run" ]
 then
-    exec scrapyd
+    exec scrapyd --pidfile=
 elif [ "$1" == "pump" ]
 then
     exec python crawl_scheduler.py
