@@ -35,6 +35,7 @@ scrapy crawl <dataset>
 | Köln 2016 | [buergerhaushalt.stadt-koeln.de/2016/buergervorschlaege](https://buergerhaushalt.stadt-koeln.de/2016/buergervorschlaege?&sort_bef_combine=php+ASC) | 827 | 1314 | 2141 | 9 minutes | scrapy crawl koeln2016|
 | Leitbild Bad Godesberg | [bonn-macht-mit.de/dialoge/onlinebeteiligung-zum-leitbild-bad-godesberg](https://www.bonn-macht-mit.de/dialoge/onlinebeteiligung-zum-leitbild-bad-godesberg) | 556 | 698 | 1254 | 2 minutes | scrapy crawl badgodesberg|
 | Mängelmelder Braunschweig | [mitreden.braunschweig.de/node/1358](https://www.mitreden.braunschweig.de/node/1358) | ≥ 3220 | | | 34 minutes | scrapy crawl maengelmelder-braunschweig|
+| Nahverkehrsplan Ulm | [zukunftsstadt-ulm.de/dialog](https://www.zukunftsstadt-ulm.de/dialog/hier-konnten-sie-mit-uns-zu-den-einzelnen-bus-und-bahnlinien-diskutieren) | 498 | 619 | 1117 | 1 minute | scrapy crawl nahverkehrsplan-ulm |
 | Raddialog Bonn | [raddialog.bonn.de/dialoge](https://www.raddialog.bonn.de/dialoge/bonner-rad-dialog?sort_bef_combine=created%20ASC) | 2331 | 2425 | 4756 | 16 minutes | scrapy crawl raddialog-bonn|
 | Raddialog Koeln | [raddialog-ehrenfeld.koeln.de/dialoge](http://www.raddialog-ehrenfeld.koeln/dialoge/ehrenfelder-raddialog?sort_bef_combine=created%20ASC) | 378 | 277 | 655 | 2 minutes | scrapy crawl raddialog-koeln|
 | Raddialog Moers | [raddialog.moers.de/dialoge](https://www.raddialog.moers.de/node/1384?sort_bef_combine=created%20ASC) | 463 | 300 | 763 | 3 minutes | scrapy crawl raddialog-moers|
