@@ -91,7 +91,7 @@ def get_top_level_comment(comment: Selector, forum: str) -> dict:
     suggestion_item['date_time'] = datetime.strptime(date_time_string, "%d. %b. %Y<br> um %H:%M")
     suggestion_item['forum'] = forum
     suggestion_item['author'] = comment.css(".submitted .username::text").extract_first()
-    suggestion_item['content'] = "\n".join(comment.css(".comment-body .field-items p::text").extract())
+    suggestion_item['content'] = "\n".join(comment.css(".comment-body .field-items")[0].css("p::text").extract())
     suggestion_item['comment_count'] = len(comment.css("h5"))
     suggestion_item['comments'] = get_comments(comment, comment_id, forum)
     return suggestion_item
