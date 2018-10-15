@@ -6,7 +6,7 @@ import scrapy
 from scrapy.http import HtmlResponse
 
 from OnlineParticipationDatasets import items
-from OnlineParticipationDatasets.items import SuggestionItem
+from OnlineParticipationDatasets.items import Suggestion
 
 
 class MaengelmelderBraunschweigSpider(scrapy.Spider):
@@ -42,11 +42,11 @@ class MaengelmelderBraunschweigSpider(scrapy.Spider):
             yield response.follow(next_page, MaengelmelderBraunschweigSpider.parse_posts)
 
     @staticmethod
-    def parse_post(response: HtmlResponse) -> SuggestionItem:
+    def parse_post(response: HtmlResponse) -> Suggestion:
         """
-        Parse thread and yield a SuggestionItem, see :class:`~OnlineParticipationDataset.items.SuggestionItem`.
+        Parse thread and yield a Suggestion, see :class:`~OnlineParticipationDataset.items.Suggestion`.
         """
-        suggestion_item = items.SuggestionItem()
+        suggestion_item = items.Suggestion()
         suggestion_item['suggestion_id'] = response.url.split("/")[-1]
         suggestion_item['title'] = response.css("h2.node-title::text").extract_first()
         suggestion_item['date_time'] = datetime.strptime(response.css("p.user-and-date:first-child::text").extract()[1].strip(), "am %d.%m.%Y")

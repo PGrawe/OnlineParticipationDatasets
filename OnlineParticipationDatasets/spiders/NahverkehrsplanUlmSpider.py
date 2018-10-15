@@ -28,8 +28,8 @@ class NahverkehrsplanUlmSpider(scrapy.Spider):
 
 def parse_forum(response: HtmlResponse) -> dict:
     """
-    Parse thread and yield a SuggestionItem for each comment,
-    see :class:`~OnlineParticipationDataset.items.SuggestionItem`.
+    Parse thread and yield a Suggestion for each comment,
+    see :class:`~OnlineParticipationDataset.items.Suggestion`.
 
     :param response: scrapy response
     :return: generator
