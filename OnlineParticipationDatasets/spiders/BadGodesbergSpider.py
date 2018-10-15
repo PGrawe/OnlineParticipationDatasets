@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from OnlineParticipationDataset.spiders.RaddialogBonnSpider import RaddialogBonnSpider
+from OnlineParticipationDatasets.spiders.RaddialogBonnSpider import RaddialogBonnSpider
 
 
 class BadGodesbergSpider(RaddialogBonnSpider):

@@ -5,8 +5,8 @@ from typing import Generator
 import scrapy
 from scrapy.http import HtmlResponse
 
-from OnlineParticipationDataset import items
-from OnlineParticipationDataset.items import SuggestionItem
+from OnlineParticipationDatasets import items
+from OnlineParticipationDatasets.items import SuggestionItem
 
 
 class MaengelmelderBraunschweigSpider(scrapy.Spider):
