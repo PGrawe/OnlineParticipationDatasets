@@ -25,7 +25,7 @@ scrapy crawl <dataset>
 |---|---|---|---|---|---|---|
 | Bonn 2015/2016 |[bonn-macht-mit 2015/2016](https://www.bonn-macht-mit.de/dialog/bürgerbeteiligung-am-haushalt-20152016/bhh/online-diskussion) | 335 | 2937 | 3271 | 27 seconds | scrapy crawl bonn2015 |
 | Bonn 2017/2018 |[bonn-macht-mit 2017/2018](https://www.bonn-macht-mit.de/node/871) | 55 | 109 | 164 | 5 seconds | scrapy crawl bonn2017 |
-| Bonn 2019/2020 |[bonn-macht-mit 2019/2020](https://www.bonn-macht-mit.de/node/2900) |  |  | |  | scrapy crawl bonn2019 |
+| Bonn 2019/2020 |[bonn-macht-mit 2019/2020](https://www.bonn-macht-mit.de/node/2900) | 232 | 600 | 832 | 1 minute | scrapy crawl bonn2019 |
 | Bürgerbudget Wuppertal |[buergerbudget.wuppertal.de](https://buergerbudget.wuppertal.de/cb/t711bwqTXj3GSGiEVwa3li3YZDqvq4pL?type=phase1) | 261 | | | 4 minutes | scrapy crawl wuppertal2017 |
 | Köln 2012 | [buergerhaushalt.stadt-koeln.de/2012/diskussion](https://buergerhaushalt.stadt-koeln.de/2012/diskussion) | 594 | 1879 | 2473 | 18 minutes | scrapy crawl koeln2012|
 | Köln 2013 | [buergerhaushalt.stadt-koeln.de/2013/buergervorschlaege](https://buergerhaushalt.stadt-koeln.de/2013/buergervorschlaege?&sort_bef_combine=php+ASC) | 592 | 3095 | 3687 | 5 minutes | scrapy crawl koeln2013|
