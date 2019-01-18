@@ -12,7 +12,6 @@ from datetime import datetime
 class Suggestion(scrapy.Item):
     # Item storing data of initial proposal.
     suggestion_id = scrapy.Field()
-    item_type = scrapy.Field()
     author = scrapy.Field()
     date_time = scrapy.Field()
     title = scrapy.Field()
@@ -33,8 +32,7 @@ class Suggestion(scrapy.Item):
 
 class Comment(scrapy.Item):
     # Item storing data of user-comments
-    parent = scrapy.Field()
-    item_type = scrapy.Field()    
+    parent = scrapy.Field() 
     comment_id = scrapy.Field()
     suggestion_id = scrapy.Field()
     author = scrapy.Field()
